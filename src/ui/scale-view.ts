@@ -199,12 +199,11 @@ export class ScaleView extends LitElement {
 		${this.fretboard.length > 0
 		? html`<div class="fretboard" style="grid-template-columns: ${this.leftHanded ? `repeat(${this.fretboard[0]?.length ?? 0}, 1fr) 32px` : `32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr)`};">
 					${this.leftHanded
-						? html`<div class="corner"></div>
-							${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
+						? html`${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
 									const cols = this.fretboard[0]?.length ?? 0;
 									const fretNum = this.startFret === 0 ? cols - i : this.startFret + cols - 1 - i;
 									return html`<div class="fret-num">${fretNum}</div>`;
-								})}${this.fretboard.map(
+								})}<div class="corner"></div>${this.fretboard.map(
 									(row, s) => html`${row.slice().reverse().map(
 										(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
 									)}<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>`,
