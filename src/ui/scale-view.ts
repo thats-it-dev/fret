@@ -132,6 +132,10 @@ export class ScaleView extends LitElement {
 	}
 
 	private _renderCell(cell: FretCell): import("https://kit.thatsit.app/lit.js").TemplateResult | string {
+		if (cell.fret === null && cell.degree === '1') {
+			// Root on open string — accent root dot with label
+			return html`<span class="dot root">${cell.degree}</span>`;
+		}
 		if (cell.fret === null) {
 			return html`<span class="dot"></span>`;
 		}
