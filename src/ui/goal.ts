@@ -26,22 +26,22 @@ export class GoalUI extends LitElement {
 			.goal-row input {
 				width: 60px;
 				padding: 4px 6px;
-				border: 1px solid var(--tk-border);
-				border-radius: var(--tk-radius-sm);
-				background: var(--tk-fill);
-				color: var(--tk-text);
+				border: 1px solid var(--border-color);
+				border-radius: var(--radius);
+				background: var(--panel);
+				color: var(--text-primary);
 				font-size: 13px;
 			}
 			.progress-bar {
 				height: 8px;
-				border-radius: var(--tk-radius-sm);
-				background: var(--tk-fill-subtle);
+				border-radius: var(--radius);
+				background: var(--surface);
 				overflow: hidden;
 				min-width: 120px;
 			}
 			.progress-fill {
 				height: 100%;
-				background: var(--tk-accent-fill);
+				background: var(--accent);
 				transition: width 0.3s ease;
 			}
 		`,
