@@ -1,5 +1,7 @@
-import { html } from "https://kit.thatsit.app/lit.js";
+import { html, css } from "https://kit.thatsit.app/lit.js";
+import { sharedStyles } from "https://kit.thatsit.app/kit.js";
 import { DIFFICULTY_LEVELS } from "../difficulty.js";
+import type { CSSResultGroup } from "https://kit.thatsit.app/lit.js";
 
 export interface SettingsDialogProps {
 	/** The currently selected difficulty level */
@@ -44,11 +46,14 @@ export function settingsDialog(p: SettingsDialogProps) {
 						${DIFFICULTY_LEVELS.map((d) => html`<option value="${d.level}" ?selected=${d.level === p.level}>${d.name} (${d.bpm} bpm, position ${d.positionWidth})</option>`)}
 					</select>
 				</label>
-				<label class="full">
-					<input type="checkbox" .checked=${p.leftHanded} @change=${(e: Event) => {
-						p.onLeftHanded((e.target as HTMLInputElement).checked);
-					}} />
-					<span class="label">left-handed</span>
+				<label>
+					<span class="label" tabindex="0">left-handed</span>
+					<span class="switch">
+						<input type="checkbox" .checked=${p.leftHanded} @change=${(e: Event) => {
+							p.onLeftHanded((e.target as HTMLInputElement).checked);
+						}} />
+						<span class="switch-track"><span class="switch-knob"></span></span>
+					</span>
 				</label>
 				<label>
 					<span class="label">daily goal (min)</span>
@@ -61,6 +66,44 @@ export function settingsDialog(p: SettingsDialogProps) {
 		</dialog>
 	`;
 }
+
+export const settingsDialogStyles: CSSResultGroup = [sharedStyles, css`
+	.switch {
+		position: relative;
+		display: inline-block;
+	}
+	.switch input {
+		position: absolute;
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+	.switch-track {
+		display: block;
+		width: 40px;
+		height: 22px;
+		background: var(--surface);
+		border-radius: var(--radius);
+		cursor: pointer;
+		transition: background 0.2s ease;
+	}
+	input:checked ~ .switch-track {
+		background: var(--primary);
+	}
+	.switch-knob {
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		width: 18px;
+		height: 18px;
+		background: var(--bg);
+		border-radius: 50%;
+		transition: transform 0.2s ease;
+	}
+	input:checked ~ .switch-track .switch-knob {
+		transform: translateX(18px);
+	}
+`];
 
 // showModal() and close() are imperative, so the reactive flag on the page drives them once per update.
 export function showDialog(root: DocumentFragment | HTMLElement, open: boolean): void {

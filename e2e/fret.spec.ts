@@ -11,7 +11,7 @@ test("set daily goal and see progress update", async ({ page }) => {
 	await page.goto("/");
 	await expect(page.locator("app-main")).toBeVisible();
 	// Open Settings dialog
-	await page.locator(".btn.ghost").filter({ hasText: "Settings" }).click();
+	await page.locator('button[aria-label="Settings"]').click();
 	// Fill the goal input inside the dialog
 	const goalInput = page.locator("dialog[aria-label=\"Settings\"]").locator('input[type="number"]').last();
 	await goalInput.fill("30");
@@ -51,7 +51,7 @@ test("scale-view shows positionWidth columns from difficulty level", async ({ pa
 	const fretboard = page.locator("scale-view").locator(".fretboard");
 	await expect(fretboard).toBeVisible();
 	// Open Settings dialog and change level
-	await page.locator(".btn.ghost").filter({ hasText: "Settings" }).click();
+	await page.locator('button[aria-label="Settings"]').click();
 	// Change to level 2 (positionWidth=6)
 	const select = page.locator("dialog[aria-label=\"Settings\"]").locator("select");
 	await select.selectOption("2");
@@ -59,17 +59,17 @@ test("scale-view shows positionWidth columns from difficulty level", async ({ pa
 	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
 	await expect(fretboard.locator(".cell")).toHaveCount(36);
 	// Open again for level 3
-	await page.locator(".btn.ghost").filter({ hasText: "Settings" }).click();
+	await page.locator('button[aria-label="Settings"]').click();
 	await select.selectOption("3");
 	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
 	await expect(fretboard.locator(".cell")).toHaveCount(36);
 	// Level 4 (positionWidth=7)
-	await page.locator(".btn.ghost").filter({ hasText: "Settings" }).click();
+	await page.locator('button[aria-label="Settings"]').click();
 	await select.selectOption("4");
 	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
 	await expect(fretboard.locator(".cell")).toHaveCount(42);
 	// Level 6 (positionWidth=8)
-	await page.locator(".btn.ghost").filter({ hasText: "Settings" }).click();
+	await page.locator('button[aria-label="Settings"]').click();
 	await select.selectOption("6");
 	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
 	await expect(fretboard.locator(".cell")).toHaveCount(48);
@@ -96,8 +96,12 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 	// Default: first fret-num should be "1"
 	await expect(page.locator("scale-view").locator(".fret-num").first()).toHaveText("1");
 	// Open Settings dialog and toggle left-handed
-	await page.locator(".btn.ghost").filter({ hasText: "Settings" }).click();
-	await page.locator("dialog[aria-label=\"Settings\"]").locator('input[type="checkbox"]').check({ force: true });
+	await page.locator('button[aria-label="Settings"]').click();
+	// Checkbox is hidden behind the toggle switch; set via evaluate to fire the change handler.
+	await page.locator("dialog[aria-label=\"Settings\"]").locator('input[type="checkbox"]').evaluate((el) => {
+		(el as HTMLInputElement).checked = true;
+		el.dispatchEvent(new Event('change', { bubbles: true }));
+	});
 	// Close dialog
 	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
 	// Now the board should mirror: fret-num order reversed

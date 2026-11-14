@@ -5,7 +5,7 @@ import { LitElement, html, css, nothing } from "https://kit.thatsit.app/lit.js";
 import { sharedStyles, toast } from "https://kit.thatsit.app/kit.js";
 import { DIFFICULTY_LEVELS } from "../src/difficulty.js";
 import { getGoalMinutes, getTodayMs, setGoalMinutes } from "../src/goals.js";
-import { settingsDialog, showDialog } from "./ui/settings-dialog.js";
+import { settingsDialog, settingsDialogStyles, showDialog } from "./ui/settings-dialog.js";
 
 export class AppMain extends LitElement {
 	static properties = {
@@ -16,6 +16,7 @@ export class AppMain extends LitElement {
 	};
 
 	static styles = [
+		settingsDialogStyles,
 		sharedStyles,
 		css`
 			.page {
@@ -45,12 +46,19 @@ export class AppMain extends LitElement {
 			.section {
 				padding: 16px;
 			}
+			.icon-btn {
+				background: none;
+				border: 0;
+				padding: 0;
+				cursor: pointer;
+				display: grid;
+				place-items: center;
+				color: var(--text-muted);
+			}
+			.icon-btn:hover { color: var(--text-primary); }
 			.section h2 {
 				margin: 0 0 12px;
 				font-size: 16px;
-			}
-			.btn.ghost {
-				border: 0;
 			}
 			/* Dialog modal styles */
 			dialog {
@@ -126,7 +134,12 @@ export class AppMain extends LitElement {
 			<div class="page">
 				<div class="title-row">
 					<h1>Fret</h1>
-					<button class="btn ghost" @click=${() => this._toggleSettings(true)}>Settings</button>
+					<button class="icon-btn" aria-label="Settings" aria-haspopup="dialog" @click=${() => this._toggleSettings(true)}>
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/>
+						<circle cx="12" cy="12" r="3"/>
+					</svg>
+				</button>
 				</div>
 
 				<div class="section">
