@@ -15,6 +15,7 @@ export class ScaleView extends LitElement {
 		root: { type: String },
 		scale: { type: String },
 		startFret: { type: Number },
+		positionWidth: { type: Number },
 		fretboard: { type: Array },
 	};
 
@@ -23,7 +24,6 @@ export class ScaleView extends LitElement {
 		css`
 			.fretboard {
 				display: grid;
-				grid-template-columns: 32px repeat(15, 1fr);
 				gap: 1px;
 				overflow-x: auto;
 				padding: 8px;
@@ -99,20 +99,26 @@ export class ScaleView extends LitElement {
 	root = "C";
 	scale = "majorPentatonic";
 	startFret = 0;
+	positionWidth = 5;
 	fretboard: FretCell[][] = [];
 
+	private _buildFn?: typeof import("../fretboard.js").buildFretboard;
+
+	async firstUpdated(): Promise<void> {
+		const mod = await import("../fretboard.js");
+		this._buildFn = mod.buildFretboard;
+		this._buildBoard();
+	}
+
+	updated(changed: Map<string, unknown>): void {
+		if (changed.has("positionWidth") || changed.has("root") || changed.has("scale") || changed.has("startFret")) {
+			this._buildBoard();
+		}
+	}
+
 	private _buildBoard(): void {
-		import("../fretboard.js").then(({ buildFretboard }) => {
-			this.fretboard = buildFretboard(this.root, this.scale, this.startFret);
-		});
-	}
-
-	firstUpdated(): void {
-		this._buildBoard();
-	}
-
-	_updated(_changed: Map<string, unknown>): void {
-		this._buildBoard();
+		if (!this._buildFn) return;
+		this.fretboard = this._buildFn(this.root, this.scale, this.startFret, this.positionWidth);
 	}
 
 	_onRootChange(e: Event): void {
@@ -160,15 +166,18 @@ export class ScaleView extends LitElement {
 					</select>
 				</label>
 			</div>
-			${this.fretboard.length > 0
-				? html`<div class="fretboard">
-						<div class="fret-numbers">
-							<span></span>
-							${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((f) => html`<span>${f}</span>`)}
-						</div>
+		${this.fretboard.length > 0
+			? html`<div class="fretboard" style="grid-template-columns: 32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr);">
+					<div class="fret-numbers">
+						<span></span>
+						${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
+							const fretNum = i === 0 && this.startFret === 0 ? 0 : this.startFret + i;
+							return html`<span>${fretNum}</span>`;
+						})}
+					</div>
 						${this.fretboard.map(
 							(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.map(
-								(cell, f) => html`<div class="cell ${cell.inScale ? "in-scale" : ""} ${cell.fret === null ? "open" : ""}" title="${f === 0 ? "open" : "fret " + f}: ${cell.note}">${cell.fret === null ? "○" : cell.note}</div>`,
+								(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""} ${cell.fret === null ? "open" : ""}" title="${cell.fret === null ? "open" : "fret " + cell.fret}: ${cell.note}">${cell.fret === null ? "○" : cell.note}</div>`,
 							)}`,
 						)}
 					</div>`

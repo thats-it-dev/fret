@@ -9,6 +9,10 @@ import { DIFFICULTY_LEVELS } from "../src/difficulty.js";
 import { getGoalMinutes, getTodayMs } from "../src/goals.js";
 
 export class AppMain extends LitElement {
+	static properties = {
+		_level: { type: Number },
+	};
+
 	static styles = [
 		sharedStyles,
 		css`
@@ -41,16 +45,20 @@ export class AppMain extends LitElement {
 		`,
 	];
 
+	_level = parseInt(localStorage.getItem("fret:level") ?? "1", 10);
+
 	render() {
 		const goalMin = getGoalMinutes();
 		const todayMs = getTodayMs();
+		const levelConfig = DIFFICULTY_LEVELS.find((d) => d.level === this._level);
+		const positionWidth = levelConfig?.positionWidth ?? 5;
 		return html`
 			<div class="page">
 				<h1>Fret</h1>
 
 				<div class="section">
 					<h2>Scales</h2>
-					<scale-view></scale-view>
+					<scale-view .positionWidth=${positionWidth}></scale-view>
 				</div>
 
 				<div class="section">
@@ -58,7 +66,7 @@ export class AppMain extends LitElement {
 					<div class="row">
 						<label>
 							Level
-							<select id="level-select" @change=${this._onLevelChange}>
+							<select id="level-select" .value=${this._level} @change=${this._onLevelChange}>
 								${DIFFICULTY_LEVELS.map((d) => html`<option value="${d.level}">${d.name} (${d.bpm} bpm, position ${d.positionWidth})</option>`)}
 							</select>
 						</label>
@@ -86,9 +94,10 @@ export class AppMain extends LitElement {
 	_onLevelChange(e: Event): void {
 		const level = parseInt((e.target as HTMLSelectElement).value, 10);
 		localStorage.setItem("fret:level", String(level));
+		this._level = level;
 		const levelConfig = DIFFICULTY_LEVELS.find((d) => d.level === level);
 		if (levelConfig) {
-			const metro = this.shadowRoot!.querySelector("metronome-ui");
+			const metro = this.shadowRoot?.querySelector("metronome-ui");
 			if (metro && "bpm" in metro) {
 				(metro as HTMLElement & { bpm: number }).bpm = levelConfig.bpm;
 			}
