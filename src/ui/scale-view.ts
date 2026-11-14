@@ -60,6 +60,12 @@ export class ScaleView extends LitElement {
 			.fretboard .cell.in-scale {
 				background: var(--tk-fill-subtle);
 			}
+			.fretboard .cell.open .dot {
+				width: 8px;
+				height: 8px;
+				background: var(--tk-border);
+				color: var(--tk-text-subtle);
+			}
 			.fretboard .cell.in-scale .dot {
 				display: flex;
 				align-items: center;
@@ -74,12 +80,6 @@ export class ScaleView extends LitElement {
 			}
 			.fretboard .cell.in-scale .dot.root {
 				background: var(--tk-accent-fill);
-			}
-			.fretboard .cell.open .dot {
-				width: 8px;
-				height: 8px;
-				background: var(--tk-border);
-				color: var(--tk-text-subtle);
 			}
 			.controls {
 				display: flex;
@@ -132,15 +132,11 @@ export class ScaleView extends LitElement {
 	}
 
 	private _renderCell(cell: FretCell): import("https://kit.thatsit.app/lit.js").TemplateResult | string {
-		if (cell.fret === null && cell.degree === '1') {
-			// Root on open string — accent root dot with label
-			return html`<span class="dot root">${cell.degree}</span>`;
+		if (cell.inScale) {
+			return html`<span class="dot ${cell.degree === '1' ? 'root' : ''}">${cell.degree}</span>`;
 		}
 		if (cell.fret === null) {
 			return html`<span class="dot"></span>`;
-		}
-		if (cell.inScale) {
-			return html`<span class="dot ${cell.degree === '1' ? 'root' : ''}">${cell.degree}</span>`;
 		}
 		return cell.note;
 	}
