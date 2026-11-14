@@ -14,9 +14,11 @@ describe("buildFretboard", () => {
 		}
 	});
 
-	it("labels first cell as open (fret === null)", () => {
+	it("labels cells with fret numbers when startFret=0", () => {
 		const board = buildFretboard("C", "majorPentatonic", 0, 5);
-		expect(board[0][0].fret).toBeNull();
+		// Open-string column is skipped; first column is fret 1.
+		expect(board[0][0].fret).toBe(1);
+		expect(board[0][3].fret).toBe(4);
 	});
 
 	it("numbers frets relative to startFret", () => {
@@ -26,37 +28,29 @@ describe("buildFretboard", () => {
 		expect(board[0][4].fret).toBe(7);
 	});
 
-	it("marks inScale correctly for open strings (startFret=0)", () => {
+	it("marks inScale correctly for fretted notes (startFret=0)", () => {
 		const board = buildFretboard("C", "majorPentatonic", 0, 5);
 		// C major pentatonic: [0, 2, 4, 7, 9]
-		// E string (pitch 4) → fret 0 is E (pitch 4, in scale)
-		expect(board[0][0].note).toBe("E");
-		expect(board[0][0].inScale).toBe(true);
-		// A string (pitch 9) → fret 0 is A (pitch 9, in scale)
-		expect(board[1][0].note).toBe("A");
-		expect(board[1][0].inScale).toBe(true);
-		// D string (pitch 2) → fret 0 is D (pitch 2, in scale)
-		expect(board[2][0].note).toBe("D");
-		expect(board[2][0].inScale).toBe(true);
-		// G string (pitch 7) → fret 0 is G (pitch 7, in scale)
-		expect(board[3][0].note).toBe("G");
-		expect(board[3][0].inScale).toBe(true);
-		// B string (pitch 11) → fret 0 is B (pitch 11, NOT in major pentatonic)
-		expect(board[4][0].note).toBe("B");
-		expect(board[4][0].inScale).toBe(false);
-		// E string (pitch 4) → fret 0 is E
-		expect(board[5][0].note).toBe("E");
-		expect(board[5][0].inScale).toBe(true);
+		// E string (pitch 4) → fret 1=F(5,out), fret 3=G(7,in)
+		expect(board[0][0].note).toBe("F");
+		expect(board[0][0].inScale).toBe(false);
+		expect(board[0][2].note).toBe("G");
+		expect(board[0][2].inScale).toBe(true);
+		// A string (pitch 9) → fret 1=A#(10,out), fret 2=B(11,out), fret 3=C(0,in)
+		expect(board[1][1].note).toBe("B");
+		expect(board[1][1].inScale).toBe(false);
+		expect(board[1][2].note).toBe("C");
+		expect(board[1][2].inScale).toBe(true);
 	});
 
 	it("marks inScale correctly for fretted notes", () => {
 		const board = buildFretboard("C", "majorPentatonic", 0, 5);
 		// E string (pitch 4) + fret 1 = F (pitch 5) not in scale
-		expect(board[0][1].note).toBe("F");
-		expect(board[0][1].inScale).toBe(false);
+		expect(board[0][0].note).toBe("F");
+		expect(board[0][0].inScale).toBe(false);
 		// E string (pitch 4) + fret 3 = G (pitch 7), IN scale
-		expect(board[0][3].note).toBe("G");
-		expect(board[0][3].inScale).toBe(true);
+		expect(board[0][2].note).toBe("G");
+		expect(board[0][2].inScale).toBe(true);
 	});
 
 	it("marks inScale for fretted notes in window", () => {
@@ -72,25 +66,25 @@ describe("buildFretboard", () => {
 
 	it("handles root C on all strings in window", () => {
 		const board = buildFretboard("C", "major", 0, 8);
-		// E string (pitch 4): fret 0=E(4,in), 1=F(5,in), 2=F#(6,out), 3=G(7,in), 4=G#(8,out), 5=A(9,in), 6=A#(10,out), 7=B(11,in)
+		// E string (pitch 4): fret 1=F(5,in), 2=F#(6,out), 3=G(7,in), 4=G#(8,out), 5=A(9,in), 6=A#(10,out), 7=B(11,in)
 		const eRow = board[0];
-		expect(eRow.length).toBe(8);
-		expect(eRow[0].inScale).toBe(true);  // E(4)
-		expect(eRow[1].inScale).toBe(true);  // F(5)
-		expect(eRow[2].inScale).toBe(false); // F#(6)
-		expect(eRow[3].inScale).toBe(true);  // G(7)
-		expect(eRow[5].inScale).toBe(true);  // A(9)
-		expect(eRow[7].inScale).toBe(true);  // B(11)
+		expect(eRow.length).toBe(8); // frets 1-8 (positionWidth=8, skip open)
+		expect(eRow[0].inScale).toBe(true);  // F(5)
+		expect(eRow[1].inScale).toBe(false); // F#(6)
+		expect(eRow[2].inScale).toBe(true);  // G(7)
+		expect(eRow[4].inScale).toBe(true);  // A(9)
+		expect(eRow[6].inScale).toBe(true);  // B(11)
 	});
 
 	it("produces correct note names per string/fret", () => {
 		const board = buildFretboard("C", "majorPentatonic", 0, 5);
 		const eRow = board[0];
-		expect(eRow[0].note).toBe("E");
-		expect(eRow[1].note).toBe("F");
-		expect(eRow[2].note).toBe("F#");
-		expect(eRow[3].note).toBe("G");
-		expect(eRow[4].note).toBe("G#");
+		// frets 1-5: F, F#, G, G#, A
+		expect(eRow[0].note).toBe("F");
+		expect(eRow[1].note).toBe("F#");
+		expect(eRow[2].note).toBe("G");
+		expect(eRow[3].note).toBe("G#");
+		expect(eRow[4].note).toBe("A");
 	});
 
 	it("handles startFret=12 (near board end)", () => {
@@ -104,72 +98,66 @@ describe("buildFretboard", () => {
 
 	it("handles A minor pentatonic (A=9)", () => {
 		const board = buildFretboard("A", "minorPentatonic", 0, 5);
-		// A minor pentatonic: [0, 3, 5, 7, 10]
-		// A string (pitch 9): 9+0=9(A,in), 9+1=10(A#,out), 9+2=11(B,in? no, 3 steps from A is C)
-		// Actually: A(9)+0=9(A,in), 9+3=12%12=0(C,in), 9+5=14%12=2(D,in), 9+7=16%12=4(E,in), 9+10=19%12=7(G,in)
-		expect(board[1][0].note).toBe("A");
-		expect(board[1][0].inScale).toBe(true);
-		expect(board[1][3].note).toBe("C");
-		expect(board[1][3].inScale).toBe(true);
+		// A minor pentatonic pitch classes: {9(A), 0(C), 2(D), 4(E), 7(G)}
+		// A string (pc=9): fret 1=A#(10,out), fret 3=C(0,in)
+		expect(board[1][0].note).toBe("A#");
+		expect(board[1][0].inScale).toBe(false);
+		expect(board[1][2].note).toBe("C");
+		expect(board[1][2].inScale).toBe(true);
 	});
 
 	describe("finger numbering", () => {
 		it("assigns finger 1 to the first fretted in-scale note on a string", () => {
 			const board = buildFretboard("C", "minorPentatonic", 0, 5);
 			// C minor pentatonic: [0,3,5,7,10] = C,D#,F,G,A
-			// E string (row 0, pc=4): fret 0=E(4,out), fret 1=F(5,in), fret 2=F#(6,out)
-			expect(board[0][0].finger).toBeUndefined(); // E(4) not in C minor pent
-			expect(board[0][1].finger).toBe(1); // F(5) is 1st in-scale fretted note
-			expect(board[0][2].finger).toBeUndefined(); // F#(6) out of scale
+			// E string (row 0, pc=4): fret 1=F(5,in), fret 2=F#(6,out)
+			expect(board[0][0].finger).toBe(1); // F(5) is 1st fretted in-scale note
+			expect(board[0][1].finger).toBeUndefined(); // F#(6) out of scale
 		});
 
-		it("assigns sequential fingers 1..4 across in-scale notes", () => {
+		it("assigns sequential fingers 1..4 across fretted in-scale notes", () => {
 			const board = buildFretboard("C", "major", 0, 8);
 			// C major: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
-			// E string (pc=4): open E(4,in), F(5,in), F#(6,out), G(7,in), G#(8,out), A(9,in), A#(10,out), B(11,in)
+			// E string (pc=4): E at fret 0 is skipped; fret 1=F(5,in), fret 3=G(7,in),
+			//   fret 5=A(9,in), fret 7=B(11,in)
 			const row = board[0];
-			expect(row[0].finger).toBe(1); // open E is 1st in-scale
-			expect(row[1].finger).toBe(2); // F is 2nd
-			expect(row[3].finger).toBe(3); // G is 3rd
-			expect(row[5].finger).toBe(4); // A is 4th
-			expect(row[7].finger).toBe(4); // B is 5th → clamped
+			expect(row[0].finger).toBe(1); // F is 1st fretted in-scale
+			expect(row[2].finger).toBe(2); // G is 2nd
+			expect(row[4].finger).toBe(3); // A is 3rd
+			expect(row[6].finger).toBe(4); // B is 4th
 		});
 
-		it("wraps at 4: 6th in-scale note also shows 4", () => {
+		it("wraps at 4: 6th fretted in-scale note also shows 4", () => {
 			const board = buildFretboard("C", "major", 0, 13);
 			const row = board[0];
-			// E string: open E(in), F(1,in), G(3,in), A(5,in), B(7,in), C(12,in)
-			// 6 in-scale notes → fingers 1,2,3,4,4,4
-			expect(row[0].finger).toBe(1); // open E is 1st in-scale
-			expect(row[1].finger).toBe(2); // F is 2nd
-			expect(row[3].finger).toBe(3); // G is 3rd
-			expect(row[5].finger).toBe(4); // A is 4th
-			expect(row[7].finger).toBe(4); // B is 5th → clamped
-			expect(row[12].finger).toBe(4); // C is 6th → clamped
+			// E string: E at fret 0 skipped; fret 1=F(in), 3=G(in), 5=A(in), 7=B(in), 12=C(in)
+			// 5 fretted in-scale notes → fingers 1,2,3,4,4
+			expect(row[0].finger).toBe(1); // F is 1st fretted in-scale
+			expect(row[2].finger).toBe(2); // G is 2nd
+			expect(row[4].finger).toBe(3); // A is 3rd
+			expect(row[6].finger).toBe(4); // B is 4th
+			expect(row[11].finger).toBe(4); // C is 5th → clamped
 		});
 
-		it("open in-scale strings get finger 1", () => {
+		it("open in-scale strings get no finger number", () => {
 			const board = buildFretboard("E", "blues", 0, 5);
-			// E string (row 0): fret 0=E(4,in, degree "1")
-			expect(board[0][0].fret).toBeNull();
-			expect(board[0][0].finger).toBe(1); // open E is 1st in-scale
-			expect(board[0][0].degree).toBe("1");
+			// Open-string column is skipped when startFret=0.
+			expect(board[0][0].fret).toBe(1);
+			expect(board[0][0].finger).toBeUndefined(); // not in E blues
 		});
 
 		it("per-string independence: each string resets finger counter", () => {
 			const board = buildFretboard("C", "major", 0, 8);
-			// Row 0 (E string): open E(in), F(in), G(in), A(in), B(in) → fingers 1,2,3,4,4
-			expect(board[0][0].finger).toBe(1); // open E is 1st in-scale
-			expect(board[0][1].finger).toBe(2);
-			expect(board[0][3].finger).toBe(3);
-			expect(board[0][5].finger).toBe(4);
-			expect(board[0][7].finger).toBe(4); // 5th → wraps
+			// Row 0 (E string): E(fret 0) skipped; F(1,in), G(3,in), A(5,in), B(7,in) → fingers 1,2,3,4
+			expect(board[0][0].finger).toBe(1); // F is 1st fretted in-scale
+			expect(board[0][2].finger).toBe(2); // G is 2nd
+			expect(board[0][4].finger).toBe(3); // A is 3rd
+			expect(board[0][6].finger).toBe(4); // B is 4th
 			// Row 5 (high E string, same pc=4): resets
-			expect(board[5][0].finger).toBe(1); // open E is 1st
-			expect(board[5][1].finger).toBe(2);
-			expect(board[5][3].finger).toBe(3);
-			expect(board[5][5].finger).toBe(4);
-			expect(board[5][7].finger).toBe(4);
+			expect(board[5][0].finger).toBe(1); // F is 1st fretted in-scale
+			expect(board[5][2].finger).toBe(2); // G is 2nd
+			expect(board[5][4].finger).toBe(3); // A is 3rd
+			expect(board[5][6].finger).toBe(4); // B is 4th
 		});
 	});
 });

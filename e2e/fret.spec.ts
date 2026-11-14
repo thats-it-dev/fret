@@ -33,9 +33,9 @@ test("scale dots show finger numbers and root is amber-highlighted", async ({ pa
 	await page.goto("/");
 	await expect(page.locator("app-main")).toBeVisible();
 	await expect(page.locator("scale-view")).toBeVisible();
-	// Root dot shows finger number (not degree label): for C major pentatonic, root C on 5th string is the 2nd in-scale note → finger 2
+	// Root dot shows finger number (not degree label): for C major pentatonic with open-string skipped, root C on 5th string is the 1st in-scale note → finger 1
 	const dotText = page.locator("scale-view").locator(".cell.in-scale .dot.root").first().textContent();
-	await expect(dotText).resolves.toBe("2");
+	await expect(dotText).resolves.toBe("1");
 	// Root dot has the .root class (amber highlight)
 	await expect(page.locator("scale-view").locator(".cell.in-scale .dot.root").first()).toHaveClass(/root/);
 	// Also assert there are multiple in-scale dots visible

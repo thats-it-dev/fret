@@ -133,10 +133,7 @@ export class ScaleView extends LitElement {
 	private _renderCell(cell: FretCell): import("https://kit.thatsit.app/lit.js").TemplateResult | string {
 		if (cell.inScale) {
 			const cls = `dot ${cell.degree === '1' ? 'root' : ''}`;
-			return html`<span class="${cls}">${cell.finger ?? cell.degree}</span>`;
-		}
-		if (cell.fret === null) {
-			return html`<span class="dot"></span>`;
+			return html`<span class="${cls}">${cell.finger}</span>`;
 		}
 		return cell.note;
 	}
@@ -190,12 +187,13 @@ export class ScaleView extends LitElement {
 			? html`<div class="fretboard" style="grid-template-columns: 32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr);">
 					<div class="corner"></div>
 					${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
-						const fretNum = i === 0 && this.startFret === 0 ? 0 : this.startFret + i;
+						const fretNum = this.startFret === 0 ? i + 1 : this.startFret + i;
 						return html`<div class="fret-num">${fretNum}</div>`;
 					})}
 					${this.fretboard.map(
 							(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.map(
-								(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""} ${cell.fret === null ? "open" : ""}" title="${cell.fret === null ? "open" : "fret " + cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+								(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+
 							)}`,
 						)}
 					</div>`

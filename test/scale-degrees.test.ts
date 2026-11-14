@@ -4,52 +4,43 @@ import { buildFretboard } from "../src/fretboard.js";
 describe("buildFretboard — degree field", () => {
 	it("C major: C=1, D=2, E=3, F=4, G=5, A=6, B=7", () => {
 		const board = buildFretboard("C", "major", 0, 2);
-		const cells = board[0]; // low E string: E(4), F(5)
-		// at fret 0 (open E): note E, in C major → degree 3
-		expect(cells[0]?.degree).toBe("3");
+		const cells = board[0]; // low E string: fret 1=F(5), fret 2=F#(6)
 		// at fret 1 (F): note F, in C major → degree 4
-		expect(cells[1]?.degree).toBe("4");
+		expect(cells[0]?.degree).toBe("4");
+		// at fret 2 (F#): not in C major → null
+		expect(cells[1]?.degree).toBeUndefined();
 	});
 
 	it("C major: all 7 degrees at first position", () => {
 		const board = buildFretboard("C", "major", 0, 8);
 		// C major: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
-		// Low E string (pc=4): E(open), F(1), F#(2), G(3), G#(4), A(5), A#(6), B(7)
-		// Open E(4): in scale → degree 3
-		expect(board[0][0].degree).toBe("3");
-		// F(5): degree 4
-		expect(board[0][1].degree).toBe("4");
-		// F#(6): not in scale → null
-		expect(board[0][2].degree).toBeUndefined();
-		// G(7): degree 5
-		expect(board[0][3].degree).toBe("5");
-		// G#(8): not in scale → null
-		expect(board[0][4].degree).toBeUndefined();
-		// A(9): degree 6
-		expect(board[0][5].degree).toBe("6");
-		// A#(10): not in scale → null
-		expect(board[0][6].degree).toBeUndefined();
-		// B(11): degree 7
-		expect(board[0][7].degree).toBe("7");
+		// Low E string (pc=4): F(1), F#(2), G(3), G#(4), A(5), A#(6), B(7), C(8)
+		expect(board[0][0].degree).toBe("4"); // F
+		expect(board[0][1].degree).toBeUndefined(); // F#
+		expect(board[0][2].degree).toBe("5"); // G
+		expect(board[0][3].degree).toBeUndefined(); // G#
+		expect(board[0][4].degree).toBe("6"); // A
+		expect(board[0][5].degree).toBeUndefined(); // A#
+		expect(board[0][6].degree).toBe("7"); // B
+		expect(board[0][7].degree).toBe("1"); // C
 	});
 
 	it("C major pentatonic: degrees 1,2,3,5,6", () => {
 		const board = buildFretboard("C", "majorPentatonic", 0, 8);
 		// C major pentatonic: C(0), D(2), E(4), G(7), A(9)
-		// Low E string: E(4), F(5), F#(6), G(7), G#(8), A(9), A#(10), B(11)
-		expect(board[0][0].degree).toBe("3"); // E is the 3rd
-		expect(board[0][3].degree).toBe("5"); // G
-		expect(board[0][5].degree).toBe("6"); // A
+		// Low E string (pc=4): F(1,out), F#(2,out), G(3,in=5), G#(4,out), A(5,in=6), A#(6,out), B(7,out), C(8,in=1)
+		expect(board[0][0].degree).toBeUndefined(); // F out
+		expect(board[0][2].degree).toBe("5"); // G
+		expect(board[0][4].degree).toBe("6"); // A
 	});
 
 	it("A natural minor: root=A highlighted as degree 1", () => {
 		const board = buildFretboard("A", "naturalMinor", 0, 5);
 		// A natural minor: A(9), B(11), C(0), D(2), E(4), F(5), G(7)
-		// High E string is board[5] (pc=4): E(open), F(1), F#(2), G(3), G#(4)
-		// Open E(4): degree 5 (E is the 5th of A minor)
-		expect(board[5][0].degree).toBe("5");
-		// F(5): degree ♭6
-		expect(board[5][1].degree).toBe("♭6");
+		// High E string (pc=4): F(1,in=♭6), F#(2,out), G(3,in=5), G#(4,out)
+		expect(board[5][0].degree).toBe("♭6"); // F
+		expect(board[5][1].degree).toBeUndefined(); // F#
+		expect(board[5][2].degree).toBe("♭7"); // G is ♭7 in A natural minor
 	});
 
 	it("C natural minor: C=1 at root", () => {
@@ -62,20 +53,17 @@ describe("buildFretboard — degree field", () => {
 	it("C blues: degrees 1,♭3,4,5,♭5,♭7", () => {
 		const board = buildFretboard("C", "blues", 0, 3);
 		// C blues: C(0), Eb(3), F(5), Gb(6), G(7), Bb(10)
-		// Low E string: E(4), F(5), F#(6)
-		// E open: not in scale → null
-		expect(board[0][0].degree).toBeUndefined();
-		// F(5): degree 4
-		expect(board[0][1].degree).toBe("4");
-		// F#(6): degree ♭5
-		expect(board[0][2].degree).toBe("♭5");
+		// Low E string: F(1,in=4), F#(2,in=♭5), G(3,in=5)
+		expect(board[0][0].degree).toBe("4"); // F
+		expect(board[0][1].degree).toBe("♭5"); // F#
+		expect(board[0][2].degree).toBe("5"); // G
 	});
 
 	it("E blues: root highlighted", () => {
 		const board = buildFretboard("E", "blues", 0, 1);
 		// E blues: E(4), G(6), A(7), Bb(8), B(9), D(10)
-		// Low E string (pc=4): E(open) → degree 1
-		expect(board[0][0].degree).toBe("1");
+		// Low E string (pc=4): F(1,out) → not in scale
+		expect(board[0][0].degree).toBeUndefined();
 	});
 
 	it("middle position (fret 5) assigns correct degrees", () => {
