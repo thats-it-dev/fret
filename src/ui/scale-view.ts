@@ -133,9 +133,9 @@ export class ScaleView extends LitElement {
 	private _renderCell(cell: FretCell): import("https://kit.thatsit.app/lit.js").TemplateResult | string {
 		if (cell.inScale) {
 			const cls = `dot ${cell.degree === '1' ? 'root' : ''}`;
-			return html`<span class="${cls}">${cell.finger}</span>`;
+			return html`<span class="${cls}">${cell.note}</span>`;
 		}
-		return cell.note;
+		return '';
 	}
 
 	_onRootChange(e: Event): void {
@@ -191,7 +191,7 @@ export class ScaleView extends LitElement {
 						return html`<div class="fret-num">${fretNum}</div>`;
 					})}
 					${this.fretboard.map(
-							(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.map(
+							(row, s) => html`<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>${row.map(
 								(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
 
 							)}`,

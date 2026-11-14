@@ -10,12 +10,12 @@ export interface FretCell {
 	note: string;
 	inScale: boolean;
 	degree?: string; // scale-degree label (e.g. "1", "♭3", "5"); undefined when not in scale
-	finger?: number; // 1–4 for fretted in-scale notes per string, 1 = first fretted in-scale note, left→right. Open in-scale notes have no finger.
+
 }
 
 /**
  * Build a fretboard grid (6 rows × positionWidth columns).
- * Row 0 = low E, Row 5 = high E (left-handed: low E on top).
+ * Row 0 = high E (1st), Row 5 = low E (6th).
  * When startFret=0 the open-string column is skipped (board shows frets 1..positionWidth).
  * Nut is on the right edge visually (column 0 is rightmost).
  * @param root - Note name (e.g. "C", "Db")
@@ -37,7 +37,7 @@ export function buildFretboard(
 	// When startFret=0 skip the open column; board shows frets 1..positionWidth.
 	const effectiveEnd = startFret === 0 ? Math.min(MAX_FRET, positionWidth) : Math.min(MAX_FRET, startFret + positionWidth - 1);
 
-	for (let s = 0; s < STRING_PITCH_CLASSES.length; s++) {
+	for (let s = STRING_PITCH_CLASSES.length - 1; s >= 0; s--) {
 		const row: FretCell[] = [];
 		const stringPitchClass = STRING_PITCH_CLASSES[s];
 		for (let f = startFret === 0 ? 1 : startFret; f <= effectiveEnd; f++) {
@@ -46,13 +46,6 @@ export function buildFretboard(
 			const inScale = pcSet.has(pc);
 			const degreeIndex = inScale ? scalePcs.indexOf(pc) : -1;
 			row.push({ fret: f, note, inScale, degree: degreeIndex >= 0 ? degreeLabels[degreeIndex] : undefined });
-		}
-		// Assign finger numbers only to fretted in-scale notes: 1 = first fretted note, 2, 3, 4 left→right (clamped at 4).
-		let finger = 0;
-		for (const cell of row) {
-			if (cell.inScale) {
-				cell.finger = ++finger > 4 ? 4 : finger;
-			}
 		}
 		board.push(row);
 	}

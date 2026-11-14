@@ -10,11 +10,12 @@ and ramps difficulty over time.
 - Daily goal: the user sets a target in minutes (default 20). The practice screen shows
   a live timer; when the timer stops, that session's duration is added to today's total.
 - Fretboard: renders a 6-string fretboard showing only the current position window
-  (`positionWidth` frets starting at the chosen start fret). Left-handed = strings
-  ordered so the low E is on top (mirror of the right-handed diagram). Nut is drawn
-  on the right edge. Each scale note shows a circular dot with its scale-degree label
-  (1, 2, 3, ♭3, 4, 5, ♭5, ♭6, ♭7); root degree uses amber (primary) fill.
-- In-scale dots display a finger number (1–4) on the dot. Fingering is per-string, left-to-right on fretted notes only: the first fretted in-scale note gets 1 (index), the next gets 2 (middle), then 3 (ring), 4 (pinky). If more than 4 fretted in-scale notes fall on one string, the count wraps: the 5th also shows 4. Open in-scale notes render as small dots without any finger or degree label. When `startFret=0` the open-string column is not shown on the board.
+  (`positionWidth` frets starting at the chosen start fret). Strings ordered 1st (high E)
+  on top to 6th (low E) on bottom. Nut is drawn on the right edge. Each scale note shows
+  a circular dot with its note name; the root (degree 1) uses amber (primary) fill.
+  Out-of-scale cells render blank.
+- Open in-scale notes render as small dots without any finger or degree label. When
+  `startFret=0` the open-string column is not shown on the board.
 - Scales: provides pentatonic (major & minor), major, natural minor, and blues. Each is
   available per root note and per starting fret.
 - Metronome: tempo in BPM, play/stop, optional accent on the first beat of each bar (4/4).
