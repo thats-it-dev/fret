@@ -27,10 +27,10 @@ export class DifficultyUI extends LitElement {
 			}
 			select {
 				padding: 6px 10px;
-				border: 1px solid var(--tk-border);
-				border-radius: var(--tk-radius-sm);
-				background: var(--tk-fill);
-				color: var(--tk-text);
+				border: 1px solid var(--border-color);
+				border-radius: var(--radius);
+				background: var(--panel);
+				color: var(--text-primary);
 				font-size: 13px;
 			}
 		`,

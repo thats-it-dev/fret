@@ -29,8 +29,8 @@ export class AppMain extends LitElement {
 			}
 			.section {
 				padding: 16px;
-				border: 1px solid var(--tk-border-subtle);
-				border-radius: var(--tk-radius-md);
+				border: 1px solid var(--line);
+				border-radius: var(--radius);
 			}
 			.section h2 {
 				margin: 0 0 12px;

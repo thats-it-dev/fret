@@ -27,44 +27,33 @@ export class ScaleView extends LitElement {
 				gap: 1px;
 				overflow-x: auto;
 				padding: 8px;
-				border: 1px solid var(--tk-border-subtle);
-				border-radius: var(--tk-radius-md);
+				border: 1px solid var(--line);
+				border-radius: var(--radius);
 			}
 			.fretboard .string-label {
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				font-size: 11px;
-				color: var(--tk-text-subtle);
-			}
-			.fretboard .fret-numbers {
-				display: flex;
-				gap: 1px;
-				margin-left: 32px;
-			}
-			.fretboard .fret-numbers span {
-				flex: 1;
-				text-align: center;
-				font-size: 10px;
-				color: var(--tk-text-subtle);
+				color: var(--text-muted);
 			}
 			.fretboard .cell {
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				border: 1px solid var(--tk-border-subtle);
+				border: 1px solid var(--line);
 				font-size: 10px;
 				min-height: 28px;
 				position: relative;
 			}
 			.fretboard .cell.in-scale {
-				background: var(--tk-fill-subtle);
+				background: var(--panel);
 			}
 			.fretboard .cell.open .dot {
 				width: 8px;
 				height: 8px;
-				background: var(--tk-border);
-				color: var(--tk-text-subtle);
+				background: var(--border-color);
+				color: var(--text-muted);
 			}
 			.fretboard .cell.in-scale .dot {
 				display: flex;
@@ -75,11 +64,21 @@ export class ScaleView extends LitElement {
 				border-radius: 50%;
 				font-size: 8px;
 				font-weight: 600;
-				color: white;
-				background: var(--tk-text-on-surface);
+				color: var(--bg);
+				background: var(--text-primary);
 			}
 			.fretboard .cell.in-scale .dot.root {
-				background: var(--tk-accent-fill);
+				background: var(--primary);
+			}
+			.fret-numbers {
+				display: grid;
+				gap: 1px;
+				padding: 0 8px 8px;
+			}
+			.fret-numbers span {
+				text-align: center;
+				font-size: 10px;
+				color: var(--text-muted);
 			}
 			.controls {
 				display: flex;
@@ -98,10 +97,10 @@ export class ScaleView extends LitElement {
 			.controls input {
 				font-size: 13px;
 				padding: 4px 6px;
-				border: 1px solid var(--tk-border);
-				border-radius: var(--tk-radius-sm);
-				background: var(--tk-fill);
-				color: var(--tk-text);
+				border: 1px solid var(--border-color);
+				border-radius: var(--radius);
+				background: var(--panel);
+				color: var(--text-primary);
 			}
 		`,
 	];
@@ -188,19 +187,19 @@ export class ScaleView extends LitElement {
 			</div>
 		${this.fretboard.length > 0
 			? html`<div class="fretboard" style="grid-template-columns: 32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr);">
-					<div class="fret-numbers">
-						<span></span>
-						${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
-							const fretNum = i === 0 && this.startFret === 0 ? 0 : this.startFret + i;
-							return html`<span>${fretNum}</span>`;
-						})}
-					</div>
-						${this.fretboard.map(
-							(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.map(
-								(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""} ${cell.fret === null ? "open" : ""}" title="${cell.fret === null ? "open" : "fret " + cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
-							)}`,
-						)}
-					</div>`
+					${this.fretboard.map(
+						(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.slice().reverse().map(
+							(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""} ${cell.fret === null ? "open" : ""}" title="${cell.fret === null ? "open" : "fret " + cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+						)}`,
+					)}
+				</div>
+				<div class="fret-numbers" style="grid-template-columns: 32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr);">
+					<span></span>
+					${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
+						const fretNum = i === 0 && this.startFret === 0 ? 0 : this.startFret + i;
+						return html`<span>${fretNum}</span>`;
+					}).reverse()}
+				</div>`
 				: ""}
 		`;
 	}
