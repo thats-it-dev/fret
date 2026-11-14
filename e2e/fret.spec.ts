@@ -29,7 +29,7 @@ test("render a fretboard with dots for the selected scale", async ({ page }) => 
 	await expect(dots.first()).toBeVisible();
 });
 
-test("scale dots show degree numbers and root is accent-highlighted", async ({ page }) => {
+test("scale dots show degree numbers and root is amber-highlighted", async ({ page }) => {
 	await page.goto("/");
 	await expect(page.locator("app-main")).toBeVisible();
 	await expect(page.locator("scale-view")).toBeVisible();

@@ -73,11 +73,12 @@ export class ScaleView extends LitElement {
 				border-radius: 50%;
 				font-size: 8px;
 				font-weight: 600;
-				color: white;
+				color: var(--bg);
 				background: var(--text-primary);
 			}
 			.fretboard .cell.in-scale .dot.root {
-				background: var(--accent);
+				background: var(--primary);
+				color: var(--bg);
 			}
 			.controls {
 				display: flex;
@@ -131,7 +132,10 @@ export class ScaleView extends LitElement {
 
 	private _renderCell(cell: FretCell): import("https://kit.thatsit.app/lit.js").TemplateResult | string {
 		if (cell.inScale) {
-			return html`<span class="dot ${cell.degree === '1' ? 'root' : ''}">${cell.degree}</span>`;
+			const cls = `dot ${cell.degree === '1' ? 'root' : ''}`;
+			return cell.fret !== null && cell.finger
+				? html`<span class="${cls}">${cell.finger}</span>`
+				: html`<span class="${cls}">${cell.degree}</span>`;
 		}
 		if (cell.fret === null) {
 			return html`<span class="dot"></span>`;

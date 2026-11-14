@@ -10,6 +10,7 @@ export interface FretCell {
 	note: string;
 	inScale: boolean;
 	degree?: string; // scale-degree label (e.g. "1", "♭3", "5"); undefined when not in scale
+	finger?: number; // 1–4 for fretted in-scale notes per string (left→right), empty for open strings
 }
 
 /**
@@ -45,6 +46,13 @@ export function buildFretboard(
 			const inScale = pcSet.has(pc);
 			const degreeIndex = inScale ? scalePcs.indexOf(pc) : -1;
 			row.push({ fret: fretNumber, note, inScale, degree: degreeIndex >= 0 ? degreeLabels[degreeIndex] : undefined });
+		}
+		// Assign finger numbers: fretted in-scale cells get 1–4 left→right
+		let finger = 0;
+		for (const cell of row) {
+			if (cell.inScale && cell.fret !== null) {
+				cell.finger = ++finger > 4 ? 4 : finger;
+			}
 		}
 		board.push(row);
 	}
