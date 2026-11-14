@@ -133,9 +133,7 @@ export class ScaleView extends LitElement {
 	private _renderCell(cell: FretCell): import("https://kit.thatsit.app/lit.js").TemplateResult | string {
 		if (cell.inScale) {
 			const cls = `dot ${cell.degree === '1' ? 'root' : ''}`;
-			return cell.fret !== null && cell.finger
-				? html`<span class="${cls}">${cell.finger}</span>`
-				: html`<span class="${cls}">${cell.degree}</span>`;
+			return html`<span class="${cls}">${cell.finger ?? cell.degree}</span>`;
 		}
 		if (cell.fret === null) {
 			return html`<span class="dot"></span>`;

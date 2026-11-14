@@ -29,13 +29,15 @@ test("render a fretboard with dots for the selected scale", async ({ page }) => 
 	await expect(dots.first()).toBeVisible();
 });
 
-test("scale dots show degree numbers and root is amber-highlighted", async ({ page }) => {
+test("scale dots show finger numbers and root is amber-highlighted", async ({ page }) => {
 	await page.goto("/");
 	await expect(page.locator("app-main")).toBeVisible();
 	await expect(page.locator("scale-view")).toBeVisible();
-	// Dots should contain degree label text (e.g. "1" for root) — filter to non-empty dots
-	const dotTexts = page.locator("scale-view").locator(".cell.in-scale .dot.root").first().textContent();
-	await expect(dotTexts).resolves.toBe("1");
+	// Root dot shows finger number (not degree label): for C major pentatonic, root C on 5th string is the 2nd in-scale note → finger 2
+	const dotText = page.locator("scale-view").locator(".cell.in-scale .dot.root").first().textContent();
+	await expect(dotText).resolves.toBe("2");
+	// Root dot has the .root class (amber highlight)
+	await expect(page.locator("scale-view").locator(".cell.in-scale .dot.root").first()).toHaveClass(/root/);
 	// Also assert there are multiple in-scale dots visible
 	const allDots = page.locator("scale-view").locator(".cell.in-scale .dot");
 	expect(await allDots.count()).toBeGreaterThan(1);
