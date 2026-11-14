@@ -14,7 +14,7 @@ and ramps difficulty over time.
   on top to 6th (low E) on bottom. Nut is drawn on the right edge. Each scale note shows
   a circular dot with its note name; the root (degree 1) uses amber (primary) fill.
   Out-of-scale cells render blank.
-- Left-handed mode: mirrors the fretboard on the x-axis (nut on the left edge, fret numbers increase right-to-left). String labels are on the right side instead of the left. Toggled from the Scales section; persisted in localStorage.
+- Left-handed mode: mirrors the fretboard on the x-axis (nut on the left edge, fret numbers increase right-to-left). String labels are on the right side instead of the left. Toggled from the Settings dialog; persisted in localStorage.
 - Open in-scale notes render as small dots without any finger or degree label. When
   `startFret=0` the open-string column is not shown on the board.
 - Scales: provides pentatonic (major & minor), major, natural minor, and blues. Each is
@@ -24,10 +24,19 @@ and ramps difficulty over time.
 - Difficulty: a level (1..N). Higher levels raise the metronome BPM and widen the scale
   position (more frets spanned). The user can level up when they can hold the current
   tempo for the whole session.
+- Settings modal (keeb-style): a `<dialog>` opened from a Settings button in the header bar.
+  Two-column panel (label left, control right). Persistent settings: level (select),
+  left-handed toggle (checkbox), and daily goal in minutes (number input). Changes persist
+  to localStorage.
 - All state (goal, level, last session) is stored in the browser (localStorage); no backend.
 
+## Design
+- Flat design: no border boxes on sections; sections are separated by the page grid gap only.
+- Fretboard grid lines come from the container background + 1px gap, not cell borders.
+- Settings uses a keeb-style `<dialog>` modal with `.modal-head` and a two-column `.panel` grid.
+
 ## Data
-- Browser localStorage: daily goal minutes, difficulty level, last completed session time.
+- Browser localStorage: daily goal minutes, difficulty level, left-handed flag, last completed session time.
 - No server, no gateway. Works offline after first load (service worker precache).
 
 ## Not in scope
