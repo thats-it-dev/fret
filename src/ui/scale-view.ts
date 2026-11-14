@@ -204,8 +204,8 @@ export class ScaleView extends LitElement {
 								const cols = this.fretboard[0]?.length ?? 0;
 								const fretNum = this.startFret === 0 ? cols - i : this.startFret + cols - 1 - i;
 								return html`<div class="fret-num">${fretNum}</div>`;
-							})}${this.fretboard.slice().reverse().map(
-								(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.slice().reverse().map(
+							})}${this.fretboard.map(
+								(row, s) => html`<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>${row.slice().reverse().map(
 									(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
 								)}`,
 							)}`

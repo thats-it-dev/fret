@@ -92,9 +92,9 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 	const firstFretNum = await page.locator("scale-view").locator(".fret-num").first().textContent();
 	// With 5 frets and startFret=0, normal order is 1-5, reversed is 5-1
 	expect(firstFretNum).toBe("5");
-	// String labels should also reverse: 6th appears first, 1st last
-	await expect(page.locator("scale-view").locator(".string-label").first()).toContainText("6th");
-	await expect(page.locator("scale-view").locator(".string-label").last()).toContainText("1st");
+	// String labels should NOT reverse: 1st appears first, 6th last
+	await expect(page.locator("scale-view").locator(".string-label").first()).toContainText("1st");
+	await expect(page.locator("scale-view").locator(".string-label").last()).toContainText("6th");
 	// Cell order should also be reversed
 	const cellTitle = await page.locator("scale-view").locator(".cell").first().getAttribute("title");
 	// First cell should be in the 6th string (low E) at the highest fret
