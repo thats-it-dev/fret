@@ -15,6 +15,7 @@ export class ScaleView extends LitElement {
 		root: { type: String },
 		scale: { type: String },
 		startFret: { type: Number },
+		positionWidth: { type: Number },
 		fretboard: { type: Array },
 	};
 
@@ -23,53 +24,61 @@ export class ScaleView extends LitElement {
 		css`
 			.fretboard {
 				display: grid;
-				grid-template-columns: 32px repeat(15, 1fr);
 				gap: 1px;
 				overflow-x: auto;
 				padding: 8px;
-				border: 1px solid var(--tk-border-subtle);
-				border-radius: var(--tk-radius-md);
+				border: 1px solid var(--line);
+				border-radius: var(--radius);
 			}
 			.fretboard .string-label {
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				font-size: 11px;
-				color: var(--tk-text-subtle);
-			}
-			.fretboard .fret-numbers {
-				display: flex;
-				gap: 1px;
-				margin-left: 32px;
-			}
-			.fretboard .fret-numbers span {
-				flex: 1;
-				text-align: center;
-				font-size: 10px;
-				color: var(--tk-text-subtle);
+				color: var(--text-muted);
 			}
 			.fretboard .cell {
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				border: 1px solid var(--tk-border-subtle);
+				border: 1px solid var(--line);
 				font-size: 10px;
 				min-height: 28px;
 				position: relative;
 			}
 			.fretboard .cell.in-scale {
-				background: var(--tk-fill-subtle);
+				background: var(--panel);
 			}
-			.fretboard .cell.in-scale::after {
-				content: "";
-				position: absolute;
-				width: 10px;
-				height: 10px;
+			.fretboard .cell.open .dot {
+				width: 8px;
+				height: 8px;
+				background: var(--border-color);
+				color: var(--text-muted);
+			}
+			.fretboard .cell.in-scale .dot {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 18px;
+				height: 18px;
 				border-radius: 50%;
-				background: var(--tk-accent-fill);
+				font-size: 8px;
+				font-weight: 600;
+				color: var(--bg);
+				background: var(--text-primary);
 			}
-			.fretboard .cell.open {
-				border-color: var(--tk-text-on-surface);
+			.fretboard .cell.in-scale .dot.root {
+				background: var(--primary);
+			}
+			.fret-numbers {
+				display: grid;
+				gap: 1px;
+				padding: 0 8px 8px;
+			}
+			.fret-numbers span {
+				text-align: center;
+				font-size: 10px;
+				color: var(--text-muted);
 			}
 			.controls {
 				display: flex;
@@ -88,10 +97,10 @@ export class ScaleView extends LitElement {
 			.controls input {
 				font-size: 13px;
 				padding: 4px 6px;
-				border: 1px solid var(--tk-border);
-				border-radius: var(--tk-radius-sm);
-				background: var(--tk-fill);
-				color: var(--tk-text);
+				border: 1px solid var(--border-color);
+				border-radius: var(--radius);
+				background: var(--panel);
+				color: var(--text-primary);
 			}
 		`,
 	];
@@ -99,20 +108,36 @@ export class ScaleView extends LitElement {
 	root = "C";
 	scale = "majorPentatonic";
 	startFret = 0;
+	positionWidth = 5;
 	fretboard: FretCell[][] = [];
 
+	private _buildFn?: typeof import("../fretboard.js").buildFretboard;
+
+	async firstUpdated(): Promise<void> {
+		const mod = await import("../fretboard.js");
+		this._buildFn = mod.buildFretboard;
+		this._buildBoard();
+	}
+
+	updated(changed: Map<string, unknown>): void {
+		if (changed.has("positionWidth") || changed.has("root") || changed.has("scale") || changed.has("startFret")) {
+			this._buildBoard();
+		}
+	}
+
 	private _buildBoard(): void {
-		import("../fretboard.js").then(({ buildFretboard }) => {
-			this.fretboard = buildFretboard(this.root, this.scale, this.startFret);
-		});
+		if (!this._buildFn) return;
+		this.fretboard = this._buildFn(this.root, this.scale, this.startFret, this.positionWidth);
 	}
 
-	firstUpdated(): void {
-		this._buildBoard();
-	}
-
-	_updated(_changed: Map<string, unknown>): void {
-		this._buildBoard();
+	private _renderCell(cell: FretCell): import("https://kit.thatsit.app/lit.js").TemplateResult | string {
+		if (cell.inScale) {
+			return html`<span class="dot ${cell.degree === '1' ? 'root' : ''}">${cell.degree}</span>`;
+		}
+		if (cell.fret === null) {
+			return html`<span class="dot"></span>`;
+		}
+		return cell.note;
 	}
 
 	_onRootChange(e: Event): void {
@@ -160,18 +185,21 @@ export class ScaleView extends LitElement {
 					</select>
 				</label>
 			</div>
-			${this.fretboard.length > 0
-				? html`<div class="fretboard">
-						<div class="fret-numbers">
-							<span></span>
-							${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((f) => html`<span>${f}</span>`)}
-						</div>
-						${this.fretboard.map(
-							(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.map(
-								(cell, f) => html`<div class="cell ${cell.inScale ? "in-scale" : ""} ${cell.fret === null ? "open" : ""}" title="${f === 0 ? "open" : "fret " + f}: ${cell.note}">${cell.fret === null ? "○" : cell.note}</div>`,
-							)}`,
-						)}
-					</div>`
+		${this.fretboard.length > 0
+			? html`<div class="fretboard" style="grid-template-columns: 32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr);">
+					${this.fretboard.map(
+						(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.slice().reverse().map(
+							(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""} ${cell.fret === null ? "open" : ""}" title="${cell.fret === null ? "open" : "fret " + cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+						)}`,
+					)}
+				</div>
+				<div class="fret-numbers" style="grid-template-columns: 32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr);">
+					<span></span>
+					${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
+						const fretNum = i === 0 && this.startFret === 0 ? 0 : this.startFret + i;
+						return html`<span>${fretNum}</span>`;
+					}).reverse()}
+				</div>`
 				: ""}
 		`;
 	}

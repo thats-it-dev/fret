@@ -8,6 +8,14 @@ const SCALE_INTERVALS: Record<string, number[]> = {
   blues: [0, 3, 5, 6, 7, 10],
 };
 
+export const SCALE_DEGREE_LABELS: Record<string, string[]> = {
+  majorPentatonic: ["1", "2", "3", "5", "6"],
+  minorPentatonic: ["1", "♭3", "4", "5", "♭7"],
+  major: ["1", "2", "3", "4", "5", "6", "7"],
+  naturalMinor: ["1", "2", "♭3", "4", "5", "♭6", "♭7"],
+  blues: ["1", "♭3", "4", "♭5", "5", "♭7"],
+};
+
 export { NOTE_NAMES };
 
 export const SCALES = Object.keys(SCALE_INTERVALS) as Array<keyof typeof SCALE_INTERVALS>;

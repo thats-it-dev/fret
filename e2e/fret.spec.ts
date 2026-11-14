@@ -25,8 +25,42 @@ test("render a fretboard with dots for the selected scale", async ({ page }) => 
 	await expect(page.locator("scale-view")).toBeVisible();
 	// The fretboard should render with dots (in-scale elements)
 	const dots = page.locator("scale-view").locator(".in-scale");
-	// There should be at least one dot (the root note on the open string)
+	// There should be at least one dot (the root note in the position window)
 	await expect(dots.first()).toBeVisible();
+});
+
+test("scale dots show degree numbers and root is accent-highlighted", async ({ page }) => {
+	await page.goto("/");
+	await expect(page.locator("app-main")).toBeVisible();
+	await expect(page.locator("scale-view")).toBeVisible();
+	// Dots should contain degree label text (e.g. "1" for root) — filter to non-empty dots
+	const dotTexts = page.locator("scale-view").locator(".cell.in-scale .dot.root").first().textContent();
+	await expect(dotTexts).resolves.toBe("1");
+	// Also assert there are multiple in-scale dots visible
+	const allDots = page.locator("scale-view").locator(".cell.in-scale .dot");
+	expect(await allDots.count()).toBeGreaterThan(1);
+});
+
+test("scale-view shows positionWidth columns from difficulty level", async ({ page }) => {
+	await page.goto("/");
+	// Default level 1 has positionWidth=5
+	const fretboard = page.locator("scale-view").locator(".fretboard");
+	await expect(fretboard).toBeVisible();
+	// Count cells — should be positionWidth (5 for level 1) columns
+	const cells = fretboard.locator(".cell").first();
+	await expect(cells).toBeVisible();
+	// Change to level 2 (positionWidth=6)
+	await page.locator("#level-select").selectOption("2");
+	await expect(fretboard.locator(".cell")).toHaveCount(36);
+	// Change to level 3 (positionWidth=6)
+	await page.locator("#level-select").selectOption("3");
+	await expect(fretboard.locator(".cell")).toHaveCount(36);
+	// Change to level 4 (positionWidth=7)
+	await page.locator("#level-select").selectOption("4");
+	await expect(fretboard.locator(".cell")).toHaveCount(42);
+	// Change to level 6 (positionWidth=8)
+	await page.locator("#level-select").selectOption("6");
+	await expect(fretboard.locator(".cell")).toHaveCount(48);
 });
 
 test("start and stop practice session", async ({ page }) => {
