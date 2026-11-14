@@ -1,6 +1,6 @@
 {
-	"name": "app-template",
-	"title": "App template",
-	"description": "Starter for small thatsit.app PWAs",
+	"name": "fret",
+	"title": "Fret",
+	"description": "Guitar practice: daily time goal, pentatonic scale reference, metronome, left-handed fretboard.",
 	"color": "#FFAA00"
 }
