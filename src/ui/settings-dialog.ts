@@ -71,6 +71,7 @@ export const settingsDialogStyles: CSSResultGroup = [sharedStyles, css`
 	.switch {
 		position: relative;
 		display: inline-block;
+		justify-self: end;
 	}
 	.switch input {
 		position: absolute;
