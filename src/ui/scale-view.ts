@@ -17,6 +17,7 @@ export class ScaleView extends LitElement {
 		startFret: { type: Number },
 		positionWidth: { type: Number },
 		fretboard: { type: Array },
+		leftHanded: { type: Boolean },
 	};
 
 	static styles = [
@@ -110,17 +111,19 @@ export class ScaleView extends LitElement {
 	startFret = 0;
 	positionWidth = 5;
 	fretboard: FretCell[][] = [];
+	leftHanded = false;
 
 	private _buildFn?: typeof import("../fretboard.js").buildFretboard;
 
 	async firstUpdated(): Promise<void> {
 		const mod = await import("../fretboard.js");
 		this._buildFn = mod.buildFretboard;
+		this.leftHanded = localStorage.getItem("fret:leftHanded") === "true";
 		this._buildBoard();
 	}
 
 	updated(changed: Map<string, unknown>): void {
-		if (changed.has("positionWidth") || changed.has("root") || changed.has("scale") || changed.has("startFret")) {
+		if (changed.has("positionWidth") || changed.has("root") || changed.has("scale") || changed.has("startFret") || changed.has("leftHanded")) {
 			this._buildBoard();
 		}
 	}
@@ -153,6 +156,12 @@ export class ScaleView extends LitElement {
 		this.dispatchEvent(new CustomEvent("scale-change", { detail: { root: this.root, scale: this.scale, startFret: this.startFret } }));
 	}
 
+	_onLeftHandedChange(e: Event): void {
+		this.leftHanded = (e.target as HTMLInputElement).checked;
+		localStorage.setItem("fret:leftHanded", String(this.leftHanded));
+		this._buildBoard();
+	}
+
 	render() {
 		return html`
 			<div class="controls">
@@ -182,20 +191,32 @@ export class ScaleView extends LitElement {
 						${Array.from({ length: 6 }, (_, i) => html`<option value="${i}" ?selected=${i === this.startFret}>${i}</option>`)}
 					</select>
 				</label>
+				<label>
+					Left-handed
+					<input type="checkbox" ?checked=${this.leftHanded} @change=${this._onLeftHandedChange} />
+				</label>
 			</div>
 		${this.fretboard.length > 0
 			? html`<div class="fretboard" style="grid-template-columns: 32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr);">
 					<div class="corner"></div>
-					${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
-						const fretNum = this.startFret === 0 ? i + 1 : this.startFret + i;
-						return html`<div class="fret-num">${fretNum}</div>`;
-					})}
-					${this.fretboard.map(
-							(row, s) => html`<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>${row.map(
-								(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
-
-							)}`,
-						)}
+					${this.leftHanded
+						? html`${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
+								const cols = this.fretboard[0]?.length ?? 0;
+								const fretNum = this.startFret === 0 ? cols - i : this.startFret + cols - 1 - i;
+								return html`<div class="fret-num">${fretNum}</div>`;
+							})}${this.fretboard.slice().reverse().map(
+								(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.slice().reverse().map(
+									(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+								)}`,
+							)}`
+						: html`${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
+								const fretNum = this.startFret === 0 ? i + 1 : this.startFret + i;
+								return html`<div class="fret-num">${fretNum}</div>`;
+							})}${this.fretboard.map(
+								(row, s) => html`<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>${row.map(
+									(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+								)}`,
+							)}`}
 					</div>`
 				: ""}
 		`;
