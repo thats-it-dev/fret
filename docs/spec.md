@@ -14,6 +14,7 @@ and ramps difficulty over time.
   on top to 6th (low E) on bottom. Nut is drawn on the right edge. Each scale note shows
   a circular dot with its note name; the root (degree 1) uses amber (primary) fill.
   Out-of-scale cells render blank.
+- Left-handed mode: mirrors the fretboard on the x-axis (nut on the left edge, fret numbers increase right-to-left). String labels are on the right side instead of the left. Toggled from the Scales section; persisted in localStorage.
 - Open in-scale notes render as small dots without any finger or degree label. When
   `startFret=0` the open-string column is not shown on the board.
 - Scales: provides pentatonic (major & minor), major, natural minor, and blues. Each is
