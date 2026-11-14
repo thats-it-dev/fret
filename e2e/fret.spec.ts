@@ -29,6 +29,18 @@ test("render a fretboard with dots for the selected scale", async ({ page }) => 
 	await expect(dots.first()).toBeVisible();
 });
 
+test("scale dots show degree numbers and root is accent-highlighted", async ({ page }) => {
+	await page.goto("/");
+	await expect(page.locator("app-main")).toBeVisible();
+	await expect(page.locator("scale-view")).toBeVisible();
+	// Dots should contain degree label text (e.g. "1" for root) — filter to non-empty dots
+	const dotTexts = page.locator("scale-view").locator(".cell.in-scale .dot.root").first().textContent();
+	await expect(dotTexts).resolves.toBe("1");
+	// Also assert there are multiple in-scale dots visible
+	const allDots = page.locator("scale-view").locator(".cell.in-scale .dot");
+	expect(await allDots.count()).toBeGreaterThan(1);
+});
+
 test("scale-view shows positionWidth columns from difficulty level", async ({ page }) => {
 	await page.goto("/");
 	// Default level 1 has positionWidth=5

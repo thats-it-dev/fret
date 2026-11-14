@@ -12,7 +12,8 @@ and ramps difficulty over time.
 - Fretboard: renders a 6-string fretboard showing only the current position window
   (`positionWidth` frets starting at the chosen start fret). Left-handed = strings
   ordered so the low E is on top (mirror of the right-handed diagram). Nut is drawn
-  on the right edge.
+  on the right edge. Each scale note shows a circular dot with its scale-degree label
+  (1, 2, 3, ♭3, 4, 5, ♭5, ♭6, ♭7); root degree uses accent fill.
 - Scales: provides pentatonic (major & minor), major, natural minor, and blues. Each is
   available per root note and per starting fret.
 - Metronome: tempo in BPM, play/stop, optional accent on the first beat of each bar (4/4).

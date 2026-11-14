@@ -60,16 +60,26 @@ export class ScaleView extends LitElement {
 			.fretboard .cell.in-scale {
 				background: var(--tk-fill-subtle);
 			}
-			.fretboard .cell.in-scale::after {
-				content: "";
-				position: absolute;
-				width: 10px;
-				height: 10px;
+			.fretboard .cell.in-scale .dot {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 18px;
+				height: 18px;
 				border-radius: 50%;
+				font-size: 8px;
+				font-weight: 600;
+				color: white;
+				background: var(--tk-text-on-surface);
+			}
+			.fretboard .cell.in-scale .dot.root {
 				background: var(--tk-accent-fill);
 			}
-			.fretboard .cell.open {
-				border-color: var(--tk-text-on-surface);
+			.fretboard .cell.open .dot {
+				width: 8px;
+				height: 8px;
+				background: var(--tk-border);
+				color: var(--tk-text-subtle);
 			}
 			.controls {
 				display: flex;
@@ -119,6 +129,16 @@ export class ScaleView extends LitElement {
 	private _buildBoard(): void {
 		if (!this._buildFn) return;
 		this.fretboard = this._buildFn(this.root, this.scale, this.startFret, this.positionWidth);
+	}
+
+	private _renderCell(cell: FretCell): import("https://kit.thatsit.app/lit.js").TemplateResult | string {
+		if (cell.fret === null) {
+			return html`<span class="dot"></span>`;
+		}
+		if (cell.inScale) {
+			return html`<span class="dot ${cell.degree === '1' ? 'root' : ''}">${cell.degree}</span>`;
+		}
+		return cell.note;
 	}
 
 	_onRootChange(e: Event): void {
@@ -177,7 +197,7 @@ export class ScaleView extends LitElement {
 					</div>
 						${this.fretboard.map(
 							(row, s) => html`<div class="string-label">${["6th", "5th", "4th", "3rd", "2nd", "1st"][s]}</div>${row.map(
-								(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""} ${cell.fret === null ? "open" : ""}" title="${cell.fret === null ? "open" : "fret " + cell.fret}: ${cell.note}">${cell.fret === null ? "○" : cell.note}</div>`,
+								(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""} ${cell.fret === null ? "open" : ""}" title="${cell.fret === null ? "open" : "fret " + cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
 							)}`,
 						)}
 					</div>`
