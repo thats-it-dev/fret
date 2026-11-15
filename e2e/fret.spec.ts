@@ -10,13 +10,13 @@ test("renders the app", async ({ page }) => {
 test("set daily goal and see progress update", async ({ page }) => {
 	await page.goto("/");
 	await expect(page.locator("app-main")).toBeVisible();
-	// Open Settings dialog
+	// Open Settings sheet
 	await page.locator('button[aria-label="Settings"]').click();
-	// Fill the goal input inside the dialog
-	const goalInput = page.locator("dialog[aria-label=\"Settings\"]").locator('input[type="number"]').last();
+	// Fill the goal input inside the sheet
+	const goalInput = page.locator("tk-sheet").locator('input[type="number"]');
 	await goalInput.fill("30");
-	// Close dialog
-	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
+	// Close sheet
+	await page.locator("tk-sheet").locator("button[aria-label=\"Close\"]").click();
 	// See the goal reflected in the practice progress text
 	await expect(page.locator("practice-ui")).toContainText("30 min");
 });
@@ -50,28 +50,28 @@ test("scale-view shows positionWidth columns from difficulty level", async ({ pa
 	// Default level 1 has positionWidth=5
 	const fretboard = page.locator("scale-view").locator(".fretboard");
 	await expect(fretboard).toBeVisible();
-	// Open Settings dialog and change level
+	// Open Settings sheet and change level
 	await page.locator('button[aria-label="Settings"]').click();
 	// Change to level 2 (positionWidth=6)
-	const select = page.locator("dialog[aria-label=\"Settings\"]").locator("select");
+	const select = page.locator("tk-sheet").locator("select");
 	await select.selectOption("2");
-	// Close dialog
-	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
+	// Close sheet
+	await page.locator("tk-sheet").locator("button[aria-label=\"Close\"]").click();
 	await expect(fretboard.locator(".cell")).toHaveCount(36);
 	// Open again for level 3
 	await page.locator('button[aria-label="Settings"]').click();
 	await select.selectOption("3");
-	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
+	await page.locator("tk-sheet").locator("button[aria-label=\"Close\"]").click();
 	await expect(fretboard.locator(".cell")).toHaveCount(36);
 	// Level 4 (positionWidth=7)
 	await page.locator('button[aria-label="Settings"]').click();
 	await select.selectOption("4");
-	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
+	await page.locator("tk-sheet").locator("button[aria-label=\"Close\"]").click();
 	await expect(fretboard.locator(".cell")).toHaveCount(42);
 	// Level 6 (positionWidth=8)
 	await page.locator('button[aria-label="Settings"]').click();
 	await select.selectOption("6");
-	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
+	await page.locator("tk-sheet").locator("button[aria-label=\"Close\"]").click();
 	await expect(fretboard.locator(".cell")).toHaveCount(48);
 });
 
@@ -95,15 +95,12 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 	await page.evaluate(() => localStorage.removeItem("fret:leftHanded"));
 	// Default: first fret-num should be "1"
 	await expect(page.locator("scale-view").locator(".fret-num").first()).toHaveText("1");
-	// Open Settings dialog and toggle left-handed
+	// Open Settings sheet and toggle left-handed
 	await page.locator('button[aria-label="Settings"]').click();
-	// Checkbox is hidden behind the toggle switch; set via evaluate to fire the change handler.
-	await page.locator("dialog[aria-label=\"Settings\"]").locator('input[type="checkbox"]').evaluate((el) => {
-		(el as HTMLInputElement).checked = true;
-		el.dispatchEvent(new Event('change', { bubbles: true }));
-	});
-	// Close dialog
-	await page.locator("dialog[aria-label=\"Settings\"]").locator("button.x").click();
+	// Toggle is now a button with role="switch"
+	await page.locator("tk-sheet").locator('button[role="switch"]').click();
+	// Close sheet
+	await page.locator("tk-sheet").locator("button[aria-label=\"Close\"]").click();
 	// Now the board should mirror: fret-num order reversed
 	const firstFretNum = await page.locator("scale-view").locator(".fret-num").first().textContent();
 	// With 5 frets and startFret=0, normal order is 1-5, reversed is 5-1

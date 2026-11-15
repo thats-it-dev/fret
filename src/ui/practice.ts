@@ -19,35 +19,10 @@ export class PracticeUI extends LitElement {
 				gap: 12px;
 				flex-wrap: wrap;
 			}
-			button {
-				padding: 8px 16px;
-			}
 			.timer {
 				font-size: 16px;
 				font-variant-numeric: tabular-nums;
 				min-width: 80px;
-			}
-			.progress-row {
-				display: flex;
-				align-items: center;
-				gap: 8px;
-				margin-top: 8px;
-			}
-			.progress-bar {
-				height: 6px;
-				border-radius: 3px;
-				background: var(--surface);
-				overflow: hidden;
-				flex: 1;
-			}
-			.progress-fill {
-				height: 100%;
-				background: var(--primary);
-				transition: width 0.3s ease;
-			}
-			.progress-text {
-				font-size: 13px;
-				color: var(--text-secondary);
 			}
 		`,
 	];
@@ -98,15 +73,10 @@ export class PracticeUI extends LitElement {
 
 		return html`
 			<div class="practice-row">
-				<button @click=${this._toggle}>${this.started ? "Stop" : "Start"}</button>
+				<button class="btn" @click=${this._toggle}>${this.started ? "Stop" : "Start"}</button>
 				<span class="timer">${display}</span>
 			</div>
-			<div class="progress-row">
-				<div class="progress-bar">
-					<div class="progress-fill" style="width: ${pct}%"></div>
-				</div>
-				<span class="progress-text">${displayed} / ${this.goalMin} min (${pct}%)</span>
-			</div>
+			<tk-progress label="today" unit="min" .value=${Math.round(this.todayMs / 60000)} .max=${this.goalMin}></tk-progress>
 		`;
 	}
 }
