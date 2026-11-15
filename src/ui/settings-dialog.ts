@@ -18,6 +18,8 @@ export interface SettingsDialogProps {
 	onGoal: (goalMin: number) => void;
 	/** Close callback (backdrop click); passes whether to keep open */
 	onClose: (open: boolean) => void;
+	/** Whether the sheet is open */
+	open: boolean;
 }
 
 /**
@@ -29,69 +31,58 @@ export interface SettingsDialogProps {
  */
 export function settingsDialog(p: SettingsDialogProps) {
 	return html`
-		<dialog @close=${() => p.onClose(false)} @click=${(e: MouseEvent) => {
-			if (e.target === e.currentTarget) p.onClose(false);
-		}} aria-label="Settings">
-			<div class="modal-head">
-				<span class="label">settings</span>
-				<button class="x" aria-label="Close settings" @click=${() => p.onClose(false)}>✕</button>
+		<tk-sheet heading="Settings" .open=${p.open} @tk-close=${() => p.onClose(false)}>
+			<div class="form">
+				<label>level</label>
+				<select id="level" @change=${(e: Event) => {
+					const val = parseInt((e.target as HTMLSelectElement).value, 10);
+					p.onLevel(val);
+				}}>
+					${DIFFICULTY_LEVELS.map((d) => html`<option value="${d.level}" ?selected=${d.level === p.level}>${d.name} (${d.bpm} bpm, position ${d.positionWidth})</option>`)}
+				</select>
+				<label>Left-handed</label>
+				<button class="switch" role="switch" aria-checked="${String(p.leftHanded)}" aria-label="Left-handed" @click=${() => p.onLeftHanded(!p.leftHanded)}></button>
+				<label>Daily goal (min)</label>
+				<input id="goal" type="number" min="0" max="240" step="5" .value=${String(p.goalMin)} @change=${(e: Event) => {
+					const val = parseInt((e.target as HTMLInputElement).value, 10);
+					if (!isNaN(val) && val >= 0) p.onGoal(val);
+				}} />
 			</div>
-			<div class="panel">
-				<label>
-					<span class="label">level</span>
-					<select @change=${(e: Event) => {
-						const val = parseInt((e.target as HTMLSelectElement).value, 10);
-						p.onLevel(val);
-					}}>
-						${DIFFICULTY_LEVELS.map((d) => html`<option value="${d.level}" ?selected=${d.level === p.level}>${d.name} (${d.bpm} bpm, position ${d.positionWidth})</option>`)}
-					</select>
-				</label>
-				<label>
-					<span class="label" tabindex="0">left-handed</span>
-					<span class="switch">
-						<input type="checkbox" .checked=${p.leftHanded} @change=${(e: Event) => {
-							p.onLeftHanded((e.target as HTMLInputElement).checked);
-						}} />
-						<span class="switch-track"><span class="switch-knob"></span></span>
-					</span>
-				</label>
-				<label>
-					<span class="label">daily goal (min)</span>
-					<input type="number" min="0" max="240" step="5" .value=${String(p.goalMin)} @change=${(e: Event) => {
-						const val = parseInt((e.target as HTMLInputElement).value, 10);
-						if (!isNaN(val) && val >= 0) p.onGoal(val);
-					}} />
-				</label>
-			</div>
-		</dialog>
+		</tk-sheet>
 	`;
 }
 
 export const settingsDialogStyles: CSSResultGroup = [sharedStyles, css`
-	.switch {
-		position: relative;
-		display: inline-block;
+	.form {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 14px 16px;
+		align-items: center;
+	}
+	.form label {
+		color: var(--text-secondary);
+	}
+	.form input:not([type="checkbox"]):not([type="radio"]),
+	.form select {
+		width: 220px;
+		max-width: 100%;
 		justify-self: end;
 	}
-	.switch input {
-		position: absolute;
-		opacity: 0;
-		width: 0;
-		height: 0;
-	}
-	.switch-track {
-		display: block;
+	.form .switch {
+		justify-self: end;
+		position: relative;
 		width: 40px;
 		height: 22px;
-		background: var(--surface);
 		border-radius: var(--radius);
+		background: var(--surface);
 		cursor: pointer;
 		transition: background 0.2s ease;
 	}
-	input:checked ~ .switch-track {
+	.form .switch[aria-checked="true"] {
 		background: var(--primary);
 	}
-	.switch-knob {
+	.form .switch::after {
+		content: "";
 		position: absolute;
 		top: 2px;
 		left: 2px;
@@ -101,16 +92,30 @@ export const settingsDialogStyles: CSSResultGroup = [sharedStyles, css`
 		border-radius: 50%;
 		transition: transform 0.2s ease;
 	}
-	input:checked ~ .switch-track .switch-knob {
+	.form .switch[aria-checked="true"]::after {
 		transform: translateX(18px);
 	}
+	.form .hint,
+	.form .error {
+		grid-column: 1 / -1;
+		margin-top: -10px;
+		font-size: 0.85rem;
+	}
+	.form .hint {
+		color: var(--text-muted);
+	}
+	.form .error {
+		color: var(--accent);
+	}
+	.form input[aria-invalid="true"],
+	.form select[aria-invalid="true"] {
+		border-color: var(--accent);
+	}
+	@media (max-width: 480px) {
+		.form input:not([type="checkbox"]):not([type="radio"]),
+		.form select {
+			width: 160px;
+		}
+	}
 `];
-
-// showModal() and close() are imperative, so the reactive flag on the page drives them once per update.
-export function showDialog(root: DocumentFragment | HTMLElement, open: boolean): void {
-	const dlg = root.querySelector("dialog") as HTMLDialogElement | null;
-	if (!dlg || dlg.open === open) return;
-	if (open) dlg.showModal();
-	else dlg.close();
-}
 

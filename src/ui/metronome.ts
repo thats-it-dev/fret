@@ -20,9 +20,6 @@ export class MetronomeUI extends LitElement {
 				font-size: 18px;
 				font-weight: bold;
 			}
-			button {
-				padding: 8px 16px;
-			}
 		`,
 	];
 
@@ -89,7 +86,7 @@ export class MetronomeUI extends LitElement {
 		return html`
 			<div class="container">
 				<span class="bpm-display">${this.bpm} BPM</span>
-				<button @click=${this._toggle}>${this.playing ? "Stop" : "Play"}</button>
+				<button class="btn" @click=${this._toggle}>${this.playing ? "Stop" : "Play"}</button>
 			</div>
 		`;
 	}

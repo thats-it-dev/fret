@@ -24,7 +24,7 @@ and ramps difficulty over time.
 - Difficulty: a level (1..N). Higher levels raise the metronome BPM and widen the scale
   position (more frets spanned). The user can level up when they can hold the current
   tempo for the whole session.
-- Settings modal (keeb-style): a `<dialog>` opened from a Settings button in the header bar.
+- Settings sheet: a `<tk-sheet heading="Settings">` opened from a Settings button in the header bar.
   Two-column panel (label left, control right). Persistent settings: level (select),
   left-handed toggle (checkbox), and daily goal in minutes (number input). Changes persist
   to localStorage.
@@ -33,7 +33,7 @@ and ramps difficulty over time.
 ## Design
 - Flat design: no border boxes on sections; sections are separated by the page grid gap only.
 - Fretboard grid lines come from the container background + 1px gap, not cell borders.
-- Settings uses a keeb-style `<dialog>` modal with `.modal-head` and a two-column `.panel` grid.
+- Settings uses a `<tk-sheet>` with the kit `.form` two-column grid (label left, control right).
 
 ## Data
 - Browser localStorage: daily goal minutes, difficulty level, left-handed flag, last completed session time.

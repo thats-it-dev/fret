@@ -157,7 +157,7 @@ export class ScaleView extends LitElement {
 		return html`
 			<div class="controls">
 				<label>
-					Root
+					<span class="label">Root</span>
 					<select @change=${this._onRootChange}>
 						${["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"].map(
 							(n) => html`<option value="${n}" ?selected=${n === this.root}>${n}</option>`,
@@ -165,7 +165,7 @@ export class ScaleView extends LitElement {
 					</select>
 				</label>
 				<label>
-					Scale
+					<span class="label">Scale</span>
 					<select @change=${this._onScaleChange}>
 						${[
 							["majorPentatonic", "Major Pentatonic"],
@@ -177,7 +177,7 @@ export class ScaleView extends LitElement {
 					</select>
 				</label>
 				<label>
-					Start fret
+					<span class="label">Start fret</span>
 					<select @change=${this._onFretChange}>
 						${Array.from({ length: 6 }, (_, i) => html`<option value="${i}" ?selected=${i === this.startFret}>${i}</option>`)}
 					</select>
