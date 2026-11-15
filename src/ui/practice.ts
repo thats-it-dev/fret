@@ -1,10 +1,13 @@
 import { LitElement, html, css } from "https://kit.thatsit.app/lit.js";
 import { sharedStyles } from "https://kit.thatsit.app/kit.js";
+import { getTodayMs, formatDuration } from "../goals.js";
 
 export class PracticeUI extends LitElement {
 	static properties = {
 		sessionMs: { type: Number },
 		started: { type: Boolean },
+		goalMin: { type: Number },
+		todayMs: { type: Number },
 	};
 
 	static styles = [
@@ -14,6 +17,7 @@ export class PracticeUI extends LitElement {
 				display: flex;
 				align-items: center;
 				gap: 12px;
+				flex-wrap: wrap;
 			}
 			button {
 				padding: 8px 16px;
@@ -23,11 +27,35 @@ export class PracticeUI extends LitElement {
 				font-variant-numeric: tabular-nums;
 				min-width: 80px;
 			}
+			.progress-row {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-top: 8px;
+			}
+			.progress-bar {
+				height: 6px;
+				border-radius: 3px;
+				background: var(--surface);
+				overflow: hidden;
+				flex: 1;
+			}
+			.progress-fill {
+				height: 100%;
+				background: var(--primary);
+				transition: width 0.3s ease;
+			}
+			.progress-text {
+				font-size: 13px;
+				color: var(--text-secondary);
+			}
 		`,
 	];
 
 	sessionMs = 0;
 	started = false;
+	goalMin = 20;
+	todayMs = 0;
 	private startTime = 0;
 	private timerId: ReturnType<typeof setInterval> | null = null;
 
@@ -64,10 +92,20 @@ export class PracticeUI extends LitElement {
 		const seconds = Math.floor((this.sessionMs % 60000) / 1000);
 		const display = `${minutes}m ${seconds.toString().padStart(2, "0")}s`;
 
+		const progress = this.goalMin > 0 ? Math.min(this.todayMs / (this.goalMin * 60 * 1000), 1) : 0;
+		const pct = Math.round(progress * 100);
+		const displayed = formatDuration(this.todayMs);
+
 		return html`
 			<div class="practice-row">
 				<button @click=${this._toggle}>${this.started ? "Stop" : "Start"}</button>
 				<span class="timer">${display}</span>
+			</div>
+			<div class="progress-row">
+				<div class="progress-bar">
+					<div class="progress-fill" style="width: ${pct}%"></div>
+				</div>
+				<span class="progress-text">${displayed} / ${this.goalMin} min (${pct}%)</span>
 			</div>
 		`;
 	}

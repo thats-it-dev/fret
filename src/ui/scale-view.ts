@@ -28,8 +28,7 @@ export class ScaleView extends LitElement {
 				gap: 1px;
 				overflow-x: auto;
 				padding: 8px;
-				border: 1px solid var(--border-color);
-				border-radius: var(--radius);
+				background: var(--line);
 			}
 			.fretboard .string-label {
 				display: flex;
@@ -51,10 +50,10 @@ export class ScaleView extends LitElement {
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				border: 1px solid var(--border-color);
 				font-size: 10px;
 				min-height: 28px;
 				position: relative;
+				background: var(--panel);
 			}
 			.fretboard .cell.in-scale {
 				background: var(--surface);
@@ -98,8 +97,7 @@ export class ScaleView extends LitElement {
 			.controls input {
 				font-size: 13px;
 				padding: 4px 6px;
-				border: 1px solid var(--border-color);
-				border-radius: var(--radius);
+				border: 0;
 				background: var(--panel);
 				color: var(--text-primary);
 			}
@@ -118,7 +116,6 @@ export class ScaleView extends LitElement {
 	async firstUpdated(): Promise<void> {
 		const mod = await import("../fretboard.js");
 		this._buildFn = mod.buildFretboard;
-		this.leftHanded = localStorage.getItem("fret:leftHanded") === "true";
 		this._buildBoard();
 	}
 
@@ -156,12 +153,6 @@ export class ScaleView extends LitElement {
 		this.dispatchEvent(new CustomEvent("scale-change", { detail: { root: this.root, scale: this.scale, startFret: this.startFret } }));
 	}
 
-	_onLeftHandedChange(e: Event): void {
-		this.leftHanded = (e.target as HTMLInputElement).checked;
-		localStorage.setItem("fret:leftHanded", String(this.leftHanded));
-		this._buildBoard();
-	}
-
 	render() {
 		return html`
 			<div class="controls">
@@ -190,10 +181,6 @@ export class ScaleView extends LitElement {
 					<select @change=${this._onFretChange}>
 						${Array.from({ length: 6 }, (_, i) => html`<option value="${i}" ?selected=${i === this.startFret}>${i}</option>`)}
 					</select>
-				</label>
-				<label>
-					Left-handed
-					<input type="checkbox" ?checked=${this.leftHanded} @change=${this._onLeftHandedChange} />
 				</label>
 			</div>
 		${this.fretboard.length > 0
