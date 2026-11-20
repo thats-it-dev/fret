@@ -117,27 +117,31 @@ export class MetronomeUI extends LitElement {
 		if (idx >= 0) this.bpm = COMMON_BPM[idx];
 	}
 
-	private _pickChip(index: number, chip: HTMLElement): void {
+	private _pickChip(index: number): void {
 		this.bpm = COMMON_BPM[index];
-		chip.scrollIntoView({ inline: "center", block: "nearest" });
+		this._centerOn(index, "smooth");
+	}
+
+	firstUpdated(): void {
+		this._centerOn(COMMON_BPM.indexOf(nearestCommonBpm(this.bpm)), "instant");
 	}
 
 	updated(changed: Map<string, unknown>): void {
-		if (changed.has("bpm")) this._centerChip();
+		if (changed.has("bpm")) {
+			this._centerOn(COMMON_BPM.indexOf(nearestCommonBpm(this.bpm)), "smooth");
+		}
 	}
 
-	/* Keep the active tempo centered when it changes from outside (e.g. a level preset) */
-	private _centerChip(): void {
+	/* Scroll the chosen chip to the rail centre, where a snap point exists for it */
+	private _centerOn(index: number, behavior: ScrollBehavior): void {
 		const rail = this.renderRoot.querySelector<HTMLElement>(".tempo-rail");
-		if (!rail) return;
-		const chips = Array.from(rail.querySelectorAll<HTMLElement>(".tempo-chip"));
-		const idx = COMMON_BPM.indexOf(nearestCommonBpm(this.bpm));
-		const chip = chips[idx];
-		if (!chip) return;
+		const chip = rail?.querySelectorAll<HTMLElement>(".tempo-chip")[index];
+		if (!rail || !chip) return;
 		const railBox = rail.getBoundingClientRect();
 		const chipBox = chip.getBoundingClientRect();
-		const offCenter = Math.abs(chipBox.left + chipBox.width / 2 - (railBox.left + railBox.width / 2));
-		if (offCenter > chipBox.width / 2) chip.scrollIntoView({ inline: "center", block: "nearest" });
+		const target = rail.scrollLeft + chipBox.left + chipBox.width / 2 - (railBox.left + railBox.width / 2);
+		if (Math.abs(target - rail.scrollLeft) < 2) return;
+		rail.scrollTo({ left: target, behavior });
 	}
 
 	_toggle(): void {
@@ -153,13 +157,13 @@ export class MetronomeUI extends LitElement {
 			<div class="container">
 				<span class="bpm-readout" aria-live="polite">${this.bpm} <span class="label">bpm</span></span>
 				<div class="tempo-rail" role="group" aria-label="Common tempos" @scroll=${this._onRailScroll}>
-					${COMMON_BPM.map(
-						(b, i) => html`<button
-							class="btn ghost tempo-chip"
-							aria-pressed=${b === this.bpm ? "true" : "false"}
-							@click=${(e: Event) => this._pickChip(i, e.currentTarget as HTMLElement)}
-						>${b}</button>`,
-					)}
+						${COMMON_BPM.map(
+							(b, i) => html`<button
+								class="btn ghost tempo-chip"
+								aria-pressed=${b === this.bpm ? "true" : "false"}
+								@click=${() => this._pickChip(i)}
+							>${b}</button>`,
+						)}
 				</div>
 				<div class="switch-row">
 					<span class="label" id="metro-switch-label">metronome</span>

@@ -276,6 +276,12 @@ test("tapping a common tempo selects it without typing", async ({ page }) => {
 	await chip120.click();
 	await expect(readout).toContainText("120");
 	await expect(chip120).toHaveAttribute("aria-pressed", "true");
+	// The selected tempo is the one centered on the rail
+	await expect(async () => {
+		const railBox = await page.locator("metronome-ui .tempo-rail").boundingBox();
+		const chipBox = await chip120.boundingBox();
+		expect(Math.abs(chipBox!.x + chipBox!.width / 2 - (railBox!.x + railBox!.width / 2))).toBeLessThanOrEqual(28);
+	}).toPass();
 });
 
 test("swiping the tempo rail picks the centered common tempo", async ({ page }) => {
