@@ -54,11 +54,7 @@ export class ScaleView extends LitElement {
 				aspect-ratio: 21 / 9;
 				position: relative;
 				background: transparent;
-				border-right: 1px solid var(--line);
-				border-bottom: 1px solid var(--line);
-			}
-			.fretboard .cell.in-scale {
-				background: var(--surface);
+				border-right: 2px solid var(--line);
 			}
 			.fretboard .cell.open .dot {
 				width: 8px;
