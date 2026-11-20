@@ -26,6 +26,10 @@ export class AppMain extends LitElement {
 				display: grid;
 				gap: 20px;
 			}
+			/* Let sections shrink so the fretboard's own overflow-x scrolls instead of widening the page */
+			.page > * {
+				min-width: 0;
+			}
 			@media (max-width: 600px) {
 				.page {
 					padding: 12px;
