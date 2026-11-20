@@ -186,7 +186,7 @@ export class ScaleView extends LitElement {
 				</label>
 			</div>
 		${this.fretboard.length > 0
-		? html`<div class="fretboard" style="grid-template-columns: ${this.leftHanded ? `repeat(${this.fretboard[0]?.length ?? 0}, minmax(40px, 72px)) 32px` : `32px repeat(${this.fretboard[0]?.length ?? 0}, minmax(40px, 72px))`};">
+		? html`<div class="fretboard" style="grid-template-columns: ${this.leftHanded ? `repeat(${this.fretboard[0]?.length ?? 0}, minmax(40px, 1fr)) 32px` : `32px repeat(${this.fretboard[0]?.length ?? 0}, minmax(40px, 1fr))`};">
 					${this.leftHanded
 						? html`${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
 									const cols = this.fretboard[0]?.length ?? 0;
