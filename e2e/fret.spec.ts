@@ -140,6 +140,12 @@ test("fretboard cells keep a 21:9 aspect ratio and the board sits on the page ba
 		page.evaluate(() => getComputedStyle(document.body).backgroundColor),
 	]);
 	expect(boardBg).toBe(pageBg);
+	// In-scale cells must not fill differently than blank cells (dots carry the state)
+	const [inBg, outBg] = await Promise.all([
+		page.locator("scale-view").locator(".cell.in-scale").first().evaluate((el) => getComputedStyle(el).backgroundColor),
+		page.locator("scale-view").locator(".cell:not(.in-scale)").first().evaluate((el) => getComputedStyle(el).backgroundColor),
+	]);
+	expect(inBg).toBe(outBg);
 });
 
 test("the fretboard fills its container and scrolls when minimums overflow", async ({ page }) => {

@@ -33,8 +33,9 @@ and ramps difficulty over time.
 ## Design
 - Flat design: no border boxes on sections; sections are separated by the page grid gap only.
 - Fretboard: the board background is the page background (`--bg`) and cells never change
-  background (in-scale notes read by their dot alone). Grid lines are 2px `--line` vertical
-  separators on each cell's right edge only — no horizontal lines. Cells keep a fixed 21:9 aspect ratio (wider than
+  background (in-scale notes read by their dot alone). Grid lines are 2px `--line`: a vertical
+  separator on every cell's right edge and a horizontal string line on every row's bottom edge
+  except the board's bottom row (`last-row`). Cells keep a fixed 21:9 aspect ratio (wider than
   tall) at every screen width; tracks are `minmax(40px, 1fr)` so the board fills the page width
   and scrolls horizontally only when the 40px minimums no longer fit.
 - Settings uses a `<tk-sheet>` with the kit `.form` two-column grid (label left, control right).
