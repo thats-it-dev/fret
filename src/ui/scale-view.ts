@@ -50,7 +50,11 @@ export class ScaleView extends LitElement {
 			}
 			.fretboard .corner.lh {
 				border-right: 0;
-				border-left: 2px solid var(--line);
+			}
+			/* Left-handed: the axis continues through the last fret-number cell, collinear with
+			   the last fret column's separator below */
+			.fretboard .fret-num.lh-axis {
+				border-right: 2px solid var(--line);
 			}
 			.fretboard .fret-num {
 				display: flex;
@@ -209,7 +213,7 @@ export class ScaleView extends LitElement {
 							? html`${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
 									const cols = this.fretboard[0]?.length ?? 0;
 									const fretNum = this.startFret === 0 ? cols - i : this.startFret + cols - 1 - i;
-									return html`<div class="fret-num">${fretNum}</div>`;
+									return html`<div class="fret-num${i === cols - 1 ? " lh-axis" : ""}">${fretNum}</div>`;
 									})}<div class="corner lh"></div>${this.fretboard.map(
 									(row, s) => html`${row.slice().reverse().map(
 										(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}${s === this.fretboard.length - 1 ? " last-row" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
