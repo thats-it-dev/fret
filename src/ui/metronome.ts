@@ -147,6 +147,7 @@ export class MetronomeUI extends LitElement {
 
 	private stop(): void {
 		this.playing = false;
+		this.resumePending = false;
 		if (this.rafId !== null) {
 			cancelAnimationFrame(this.rafId);
 			this.rafId = null;
