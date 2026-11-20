@@ -236,3 +236,41 @@ test("the fretboard fills its container and scrolls when minimums overflow", asy
 	const scrollable = await board.evaluate((el) => el.scrollWidth > el.clientWidth);
 	expect(scrollable).toBe(true);
 });
+
+test("practice card stacks clock, progress bar and start button", async ({ page }) => {
+	await page.goto("/");
+	const timer = page.locator("practice-ui .timer");
+	const bar = page.locator("practice-ui tk-progress");
+	const btn = page.locator("practice-ui button");
+	await expect(timer).toBeVisible();
+	const t = await timer.boundingBox();
+	const b = await bar.boundingBox();
+	const s = await btn.boundingBox();
+	expect(t).not.toBeNull();
+	expect(b).not.toBeNull();
+	expect(s).not.toBeNull();
+	// Clock sits above the progress bar; the bar sits above the Start button
+	expect(t!.y + t!.height).toBeLessThanOrEqual(b!.y + 2);
+	expect(b!.y + b!.height).toBeLessThanOrEqual(s!.y + 2);
+	// Clock is centered on the card
+	const card = await page.locator("practice-ui").boundingBox();
+	expect(card).not.toBeNull();
+	expect(Math.abs(t!.x + t!.width / 2 - (card!.x + card!.width / 2))).toBeLessThanOrEqual(4);
+});
+
+test("metronome tempo is tunable directly on the centered card", async ({ page }) => {
+	await page.goto("/");
+	const tempo = page.locator('metronome-ui input[aria-label="Tempo in BPM"]');
+	await expect(tempo).toBeVisible();
+	const value0 = await tempo.inputValue();
+	expect(parseInt(value0, 10)).toBeGreaterThan(0);
+	await tempo.fill("96");
+	await tempo.dispatchEvent("change");
+	await expect(tempo).toHaveValue("96");
+	// The card's controls sit on a row centered within the component
+	const row = await page.locator("metronome-ui .container").boundingBox();
+	const met = await page.locator("metronome-ui").boundingBox();
+	expect(row).not.toBeNull();
+	expect(met).not.toBeNull();
+	expect(Math.abs(row!.x + row!.width / 2 - (met!.x + met!.width / 2))).toBeLessThanOrEqual(4);
+});

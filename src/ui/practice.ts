@@ -14,15 +14,13 @@ export class PracticeUI extends LitElement {
 		sharedStyles,
 		css`
 			.practice-row {
-				display: flex;
-				align-items: center;
+				display: grid;
 				gap: 12px;
-				flex-wrap: wrap;
+				justify-items: center;
 			}
 			.timer {
-				font-size: 16px;
+				font-size: 24px;
 				font-variant-numeric: tabular-nums;
-				min-width: 80px;
 			}
 		`,
 	];
@@ -68,15 +66,19 @@ export class PracticeUI extends LitElement {
 		const display = `${minutes}m ${seconds.toString().padStart(2, "0")}s`;
 
 		const progress = this.goalMin > 0 ? Math.min(this.todayMs / (this.goalMin * 60 * 1000), 1) : 0;
-		const pct = Math.round(progress * 100);
-		const displayed = formatDuration(this.todayMs);
 
 		return html`
 			<div class="practice-row">
-				<button class="btn" @click=${this._toggle}>${this.started ? "Stop" : "Start"}</button>
 				<span class="timer">${display}</span>
+				<tk-progress
+					label="today"
+					unit="min"
+					.value=${Math.round(this.todayMs / 60000)}
+					.max=${this.goalMin}
+					.pct=${progress}
+				></tk-progress>
+				<button class="btn" @click=${this._toggle}>${this.started ? "Stop" : "Start"}</button>
 			</div>
-			<tk-progress label="today" unit="min" .value=${Math.round(this.todayMs / 60000)} .max=${this.goalMin}></tk-progress>
 		`;
 	}
 }

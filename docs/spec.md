@@ -7,8 +7,9 @@ other scales) rendered on a left-handed fretboard, runs a metronome with timing 
 and ramps difficulty over time.
 
 ## Behaviour
-- Daily goal: the user sets a target in minutes (default 20). The practice screen shows
-  a live timer; when the timer stops, that session's duration is added to today's total.
+- Daily goal: the user sets a target in minutes (default 20). The practice card shows the live
+  session clock centered at the top, today's progress bar under it, and the Start/Stop button at
+  the bottom; when the timer stops, that session's duration is added to today's total.
 - Fretboard: renders a 6-string fretboard showing only the current position window
   (`positionWidth` frets starting at the chosen start fret). Strings ordered 1st (high E)
   on top to 6th (low E) on bottom. Nut is drawn on the right edge. Each scale note shows
@@ -19,11 +20,13 @@ and ramps difficulty over time.
   `startFret=0` the open-string column is not shown on the board.
 - Scales: provides pentatonic (major & minor), major, natural minor, and blues. Each is
   available per root note and per starting fret.
-- Metronome: tempo in BPM, play/stop, optional accent on the first beat of each bar (4/4).
-  Timing feedback: after a practice session, show how many beats were played vs target.
-- Difficulty: a level (1..N). Higher levels raise the metronome BPM and widen the scale
-  position (more frets spanned). The user can level up when they can hold the current
-  tempo for the whole session.
+- Metronome: a centered card with a direct tempo number input (BPM) and Play/Stop; the accent
+  falls on the first beat of each bar (4/4). Clicks are scheduled on the audio clock (seconds), so
+  the beat keeps its tempo even when animation frames lag. Timing feedback: after a practice
+  session, show how many beats were played vs target.
+- Difficulty: a level (1..N). Higher levels preset a faster metronome tempo and widen the scale
+  position (more frets spanned); the tempo stays directly editable on the metronome card. The user
+  can level up when they can hold the current tempo for the whole session.
 - Settings sheet: a `<tk-sheet heading="Settings">` opened from a Settings button in the header bar.
   Two-column panel (label left, control right). Persistent settings: level (select),
   left-handed toggle (checkbox), and daily goal in minutes (number input). Changes persist
