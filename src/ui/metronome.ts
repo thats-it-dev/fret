@@ -29,11 +29,12 @@ export class MetronomeUI extends LitElement {
 				scroll-snap-type: x mandatory;
 				padding: 6px 0;
 			}
-			/* Spacers half the rail width so the first and last tempo can reach the centre;
-			   percentages on children resolve against the rail's own content box */
+			/* Spacers so the first and last tempo can reach the centre (fixed against the
+			   320px rail: half-rail 160 minus half-chip ~26; percentage widths are indeterminate
+			   inside a scroll container) */
 			.rail-pad {
 				flex: 0 0 auto;
-				width: calc(50% - 26px);
+				width: 134px;
 			}
 			.tempo-chip {
 				scroll-snap-align: center;

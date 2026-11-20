@@ -272,6 +272,12 @@ test("tapping a common tempo selects it without typing", async ({ page }) => {
 	await page.goto("/");
 	const readout = page.locator("metronome-ui .bpm-readout");
 	await expect(readout).toContainText("60");
+	// On load the selected tempo already sits centered on the rail
+	await expect(async () => {
+		const railBox = await page.locator("metronome-ui .tempo-rail").boundingBox();
+		const chip60 = await page.locator("metronome-ui .tempo-chip", { hasText: /^60$/ }).boundingBox();
+		expect(Math.abs(chip60!.x + chip60!.width / 2 - (railBox!.x + railBox!.width / 2))).toBeLessThanOrEqual(28);
+	}).toPass();
 	const chip120 = page.locator("metronome-ui .tempo-chip", { hasText: "120" });
 	await chip120.click();
 	await expect(readout).toContainText("120");
