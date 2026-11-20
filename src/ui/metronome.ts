@@ -67,6 +67,8 @@ export class MetronomeUI extends LitElement {
 	private rafId: number | null = null;
 	private scrollSyncPending = false;
 	private fromRail = false;
+	private resumePending = false;
+	private waitingFrames = 0;
 
 	private playClick(accent: boolean, whenSec: number): void {
 		if (!this.context) return;
@@ -83,16 +85,32 @@ export class MetronomeUI extends LitElement {
 
 	private tick = (): void => {
 		if (!this.context) return;
-		if (this.context.state === "suspended") {
-			void this.context.resume();
-			this.state = { nextBeatTimeSec: this.context.currentTime + 0.1, nextBeatIndex: 0 };
-			this.rafId = requestAnimationFrame(this.tick);
-			return;
-		}
 		if (this.context.state !== "running") {
+			/* iOS can start (or return from the background with) a frozen context: retry the
+			   resume at most one call at a time and give up, switching the UI back off, rather
+			   than looping forever on a session that will not open */
+			this.waitingFrames++;
+			if (this.waitingFrames > 120) {
+				this.stop();
+				return;
+			}
+			if (this.context.state === "suspended" && !this.resumePending) {
+				this.resumePending = true;
+				this.context
+					.resume()
+					.then(() => {
+						this.resumePending = false;
+					})
+					.catch(() => {
+						this.resumePending = false;
+					});
+			}
+			/* keep the bar position; re-anchor only the clock */
+			this.state = { nextBeatTimeSec: this.context.currentTime + 0.1, nextBeatIndex: this.state.nextBeatIndex };
 			this.rafId = requestAnimationFrame(this.tick);
 			return;
 		}
+		this.waitingFrames = 0;
 		const scheduled = scheduleBeats(this.state, this.context.currentTime, this.bpm);
 		for (const event of scheduled.events) {
 			this.playClick(event.accent, event.timeSec);
@@ -106,8 +124,17 @@ export class MetronomeUI extends LitElement {
 		this.context = new AudioContext();
 		/* iOS: a context created in a gesture can still start suspended and its clock is
 		   frozen until resume() lands; tick retries while that settles */
+		this.waitingFrames = 0;
 		if (this.context.state === "suspended") {
-			void this.context.resume();
+			this.resumePending = true;
+			this.context
+				.resume()
+				.then(() => {
+					this.resumePending = false;
+				})
+				.catch(() => {
+					this.resumePending = false;
+				});
 		}
 		/* iOS unlock: one empty buffer started inside the gesture opens the audio session */
 		const unlock = this.context.createBufferSource();

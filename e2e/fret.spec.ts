@@ -339,3 +339,98 @@ test("sections carry no headers", async ({ page }) => {
 	await page.goto("/");
 	await expect(page.locator("app-main h2")).toHaveCount(0);
 });
+
+test("the switch drives the audio context (iOS suspended start)", async ({ page }) => {
+	await page.addInitScript(() => {
+		const w = window as unknown as { __audio: { resumes: number; starts: number }; AudioContext: unknown };
+		w.__audio = { resumes: 0, starts: 0 };
+		class FakeCtx {
+			state = "suspended";
+			currentTime = 0;
+			sampleRate = 44100;
+			destination = {};
+			constructor() {
+				setInterval(() => {
+					if (this.state === "running") this.currentTime += 0.02;
+				}, 16);
+			}
+			createOscillator() {
+				return {
+					frequency: { value: 0 },
+					connect: () => {},
+					start: () => {
+						w.__audio.starts++;
+					},
+					stop: () => {},
+				};
+			}
+			createGain() {
+				return { gain: { setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }, connect: () => {} };
+			}
+			createBuffer() {
+				return {};
+			}
+			createBufferSource() {
+				return { buffer: null, connect: () => {}, start: () => {} };
+			}
+			resume() {
+				w.__audio.resumes++;
+				this.state = "running";
+				return Promise.resolve();
+			}
+			close() {
+				this.state = "closed";
+				return Promise.resolve();
+			}
+		}
+		w.AudioContext = FakeCtx;
+	});
+	await page.goto("/");
+	await page.getByRole("switch", { name: "metronome" }).click();
+	await expect(async () => {
+		const a = await page.evaluate(() => (window as unknown as { __audio: { resumes: number; starts: number } }).__audio);
+		expect(a.resumes).toBeGreaterThanOrEqual(1);
+		expect(a.resumes).toBeLessThanOrEqual(3);
+		expect(a.starts).toBeGreaterThanOrEqual(2);
+	}).toPass();
+});
+
+test("a blocked audio session flips the switch back off", async ({ page }) => {
+	await page.addInitScript(() => {
+		const w = window as unknown as { __audio: { resumes: number }; AudioContext: unknown };
+		w.__audio = { resumes: 0 };
+		class FakeCtx {
+			state = "suspended";
+			currentTime = 0;
+			sampleRate = 44100;
+			destination = {};
+			createOscillator() {
+				return { frequency: { value: 0 }, connect: () => {}, start: () => {}, stop: () => {} };
+			}
+			createGain() {
+				return { gain: { setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }, connect: () => {} };
+			}
+			createBuffer() {
+				return {};
+			}
+			createBufferSource() {
+				return { buffer: null, connect: () => {}, start: () => {} };
+			}
+			resume() {
+				w.__audio.resumes++;
+				return new Promise<void>(() => {});
+			}
+			close() {
+				return Promise.resolve();
+			}
+		}
+		w.AudioContext = FakeCtx;
+	});
+	await page.goto("/");
+	const sw = page.getByRole("switch", { name: "metronome" });
+	await sw.click();
+	await expect(sw).toHaveAttribute("aria-checked", "true");
+	await expect(sw).toHaveAttribute("aria-checked", "false", { timeout: 15000 });
+	const resumes = await page.evaluate(() => (window as unknown as { __audio: { resumes: number } }).__audio.resumes);
+	expect(resumes).toBeLessThanOrEqual(3);
+});

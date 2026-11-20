@@ -26,8 +26,9 @@ and ramps difficulty over time.
   rail shows no scrollbar; tapping a tempo also centers and selects it. The active click
   falls on the first beat of each bar (4/4). Clicks are scheduled on the audio clock (seconds), so
   the beat keeps its tempo even when animation frames lag; on enable the audio context is resumed
-  and unlocked inside the gesture (iOS starts it suspended and freezes its clock). Timing
-  feedback: after a practice session, show how many beats were played vs target.
+  and unlocked inside the gesture (iOS starts it suspended and freezes its clock), and if the
+  session still has not opened within a couple of seconds the metronome switches itself back off.
+  Timing feedback: after a practice session, show how many beats were played vs target.
 - Difficulty: a level (1..N). Higher levels preset the nearest common metronome tempo and widen
   the scale position (more frets spanned); the tempo stays directly swipeable on the metronome
   card. The user can level up when they can hold the current tempo for the whole session.
