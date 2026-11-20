@@ -27,8 +27,13 @@ export class MetronomeUI extends LitElement {
 				width: min(100%, 320px);
 				overflow-x: auto;
 				scroll-snap-type: x mandatory;
-				/* half-rail side padding lets the first and last tempo reach the centre */
-				padding: 6px calc(50% - 26px);
+				padding: 6px 0;
+			}
+			/* Spacers half the rail width so the first and last tempo can reach the centre;
+			   percentages on children resolve against the rail's own content box */
+			.rail-pad {
+				flex: 0 0 auto;
+				width: calc(50% - 26px);
 			}
 			.tempo-chip {
 				scroll-snap-align: center;
@@ -157,13 +162,15 @@ export class MetronomeUI extends LitElement {
 			<div class="container">
 				<span class="bpm-readout" aria-live="polite">${this.bpm} <span class="label">bpm</span></span>
 				<div class="tempo-rail" role="group" aria-label="Common tempos" @scroll=${this._onRailScroll}>
-						${COMMON_BPM.map(
-							(b, i) => html`<button
-								class="btn ghost tempo-chip"
-								aria-pressed=${b === this.bpm ? "true" : "false"}
-								@click=${() => this._pickChip(i)}
-							>${b}</button>`,
-						)}
+					<span class="rail-pad" aria-hidden="true"></span>
+					${COMMON_BPM.map(
+						(b, i) => html`<button
+							class="btn ghost tempo-chip"
+							aria-pressed=${b === this.bpm ? "true" : "false"}
+							@click=${() => this._pickChip(i)}
+						>${b}</button>`,
+					)}
+					<span class="rail-pad" aria-hidden="true"></span>
 				</div>
 				<div class="switch-row">
 					<span class="label" id="metro-switch-label">metronome</span>
