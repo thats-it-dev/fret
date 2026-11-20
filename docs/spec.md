@@ -39,7 +39,8 @@ and ramps difficulty over time.
   edge instead, so no fret cell touches it), horizontal string lines on each row's bottom edge
   except the board's bottom row (`last-row`), and lines along the label axes: the number row carries
   a bottom border and, right-handed, the string labels a right border (left-handed, the last fret
-  column's separator is that axis). Note dots are capped to the cell height so they stay
+  column's separator is that axis); the corner cell carries the vertical axis beside the number row
+  (right border right-handed, left border left-handed) so the line is continuous top to bottom. Note dots are capped to the cell height so they stay
   circular when the board scrolls at minimum track width. Cells keep a fixed 21:9 aspect ratio (wider than
   tall) at every screen width; tracks are `minmax(40px, 1fr)` so the board fills the page width
   and scrolls horizontally only when the 40px minimums no longer fit.

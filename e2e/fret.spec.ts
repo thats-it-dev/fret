@@ -119,6 +119,18 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 		expect(box).not.toBeNull();
 		expect(Math.abs(box!.width - box!.height * (21 / 9))).toBeLessThanOrEqual(1);
 	}).toPass();
+	// Left-handed axis: the corner sits at the right edge and carries the vertical axis on its left
+	const cornerLeft = await page
+		.locator("scale-view")
+		.locator(".corner")
+		.evaluate((el) => getComputedStyle(el).borderLeftWidth);
+	expect(cornerLeft).toBe("2px");
+	const lhLabelRight = await page
+		.locator("scale-view")
+		.locator(".string-label")
+		.first()
+		.evaluate((el) => getComputedStyle(el).borderRightWidth);
+	expect(lhLabelRight).toBe("0px");
 });
 
 test("fretboard cells keep a 21:9 aspect ratio and the board sits on the page background", async ({ page }) => {
@@ -183,6 +195,11 @@ test("fretboard cells keep a 21:9 aspect ratio and the board sits on the page ba
 		.first()
 		.evaluate((el) => getComputedStyle(el).borderRightWidth);
 	expect(labelRight).toBe("2px");
+	const cornerRight = await page
+		.locator("scale-view")
+		.locator(".corner")
+		.evaluate((el) => getComputedStyle(el).borderRightWidth);
+	expect(cornerRight).toBe("2px");
 });
 
 test("the fretboard fills its container and scrolls when minimums overflow", async ({ page }) => {
