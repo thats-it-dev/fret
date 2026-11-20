@@ -113,15 +113,15 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 	// Cell order should also be reversed
 	const cellTitle = await page.locator("scale-view").locator(".cell").first().getAttribute("title");
 	expect(cellTitle).toContain("fret 5");
-	// Cells keep the 4:3 ratio in left-handed mode too
+	// Cells keep the 3:2 ratio in left-handed mode too
 	await expect(async () => {
 		const box = await page.locator("scale-view").locator(".cell").first().boundingBox();
 		expect(box).not.toBeNull();
-		expect(Math.abs(box!.width - box!.height * (4 / 3))).toBeLessThanOrEqual(1);
+		expect(Math.abs(box!.width - box!.height * (3 / 2))).toBeLessThanOrEqual(1);
 	}).toPass();
 });
 
-test("fretboard cells keep a 4:3 aspect ratio and the board sits on the page background", async ({ page }) => {
+test("fretboard cells keep a 3:2 aspect ratio and the board sits on the page background", async ({ page }) => {
 	await page.goto("/");
 	const board = page.locator("scale-view").locator(".fretboard");
 	await expect(board).toBeVisible();
@@ -129,7 +129,7 @@ test("fretboard cells keep a 4:3 aspect ratio and the board sits on the page bac
 	const assertRatio = async () => {
 		const box = await cell.boundingBox();
 		expect(box).not.toBeNull();
-		expect(Math.abs(box!.width - box!.height * (4 / 3))).toBeLessThanOrEqual(1);
+		expect(Math.abs(box!.width - box!.height * (3 / 2))).toBeLessThanOrEqual(1);
 	};
 	await expect(assertRatio).toPass();
 	// Same assertion at a narrow (overflow) width, per the spec's "every screen width" claim
