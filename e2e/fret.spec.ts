@@ -119,7 +119,7 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 		expect(box).not.toBeNull();
 		expect(Math.abs(box!.width - box!.height * (21 / 9))).toBeLessThanOrEqual(1);
 	}).toPass();
-	// Left-handed: the corner stays borderless so the axes meet without crossing
+	// Left-handed: the corner carries only the vertical axis (its left border) so the axes connect
 	const cornerBorders = await page
 		.locator("scale-view")
 		.locator(".corner")
@@ -127,7 +127,7 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 			const cs = getComputedStyle(el);
 			return `${cs.borderLeftWidth} ${cs.borderRightWidth} ${cs.borderBottomWidth}`;
 		});
-	expect(cornerBorders).toBe("0px 0px 0px");
+	expect(cornerBorders).toBe("2px 0px 0px");
 	const lhLabelRight = await page
 		.locator("scale-view")
 		.locator(".string-label")
@@ -205,7 +205,7 @@ test("fretboard cells keep a 21:9 aspect ratio and the board sits on the page ba
 			const cs = getComputedStyle(el);
 			return `${cs.borderLeftWidth} ${cs.borderRightWidth} ${cs.borderBottomWidth}`;
 		});
-	expect(cornerBorders).toBe("0px 0px 0px");
+	expect(cornerBorders).toBe("0px 2px 0px");
 });
 
 test("the fretboard fills its container and scrolls when minimums overflow", async ({ page }) => {
