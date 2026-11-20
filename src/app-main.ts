@@ -4,6 +4,7 @@ import "./ui/practice.js";
 import { LitElement, html, css } from "https://kit.thatsit.app/lit.js";
 import { sharedStyles, toast, SETTINGS_ICON } from "https://kit.thatsit.app/kit.js";
 import { DIFFICULTY_LEVELS } from "../src/difficulty.js";
+import { nearestCommonBpm } from "./metronome.js";
 import { getGoalMinutes, getTodayMs, setGoalMinutes } from "../src/goals.js";
 import { settingsDialog, settingsDialogStyles } from "./ui/settings-dialog.js";
 
@@ -25,6 +26,10 @@ export class AppMain extends LitElement {
 				padding: 20px;
 				display: grid;
 				gap: 20px;
+			}
+			/* Let sections shrink so the fretboard's own overflow-x scrolls instead of widening the page */
+			.page > * {
+				min-width: 0;
 			}
 			@media (max-width: 600px) {
 				.page {
@@ -56,10 +61,6 @@ export class AppMain extends LitElement {
 				color: var(--text-muted);
 			}
 			.icon-btn:hover { color: var(--text-primary); }
-			.section h2 {
-				margin: 0 0 12px;
-				font-size: 16px;
-			}
 		`,
 	];
 
@@ -82,17 +83,14 @@ export class AppMain extends LitElement {
 				</div>
 
 				<div class="section">
-					<h2>Scales</h2>
 					<scale-view .positionWidth=${positionWidth} .leftHanded=${this._leftHanded}></scale-view>
 				</div>
 
 				<div class="section">
-					<h2>Metronome</h2>
 					<metronome-ui id="metro"></metronome-ui>
 				</div>
 
 				<div class="section">
-					<h2>Practice</h2>
 					<practice-ui id="practice" .goalMin=${this._goalMin} .todayMs=${todayMs}></practice-ui>
 				</div>
 
@@ -100,7 +98,7 @@ export class AppMain extends LitElement {
 					level: this._level,
 					leftHanded: this._leftHanded,
 					goalMin: this._goalMin,
-					onLevel: (level: number) => { localStorage.setItem("fret:level", String(level)); this._level = level; const c = DIFFICULTY_LEVELS.find((d) => d.level === level); if (c) { const m = this.shadowRoot?.querySelector("metronome-ui"); if (m && "bpm" in m) (m as HTMLElement & { bpm: number }).bpm = c.bpm; toast(`${c.name} — ${c.bpm} BPM`); } },
+					onLevel: (level: number) => { localStorage.setItem("fret:level", String(level)); this._level = level; const c = DIFFICULTY_LEVELS.find((d) => d.level === level); if (c) { const bpm = nearestCommonBpm(c.bpm); const m = this.shadowRoot?.querySelector("metronome-ui"); if (m && "bpm" in m) (m as HTMLElement & { bpm: number }).bpm = bpm; toast(`${c.name} — ${bpm} BPM`); } },
 					onLeftHanded: (lh) => this._onLeftHandedChange(lh),
 					onGoal: (gm: number) => { this._onGoalChange(gm); },
 					onClose: (open) => { this._settingsOpen = open; },

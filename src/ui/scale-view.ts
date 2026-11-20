@@ -25,10 +25,11 @@ export class ScaleView extends LitElement {
 		css`
 			.fretboard {
 				display: grid;
-				gap: 1px;
+				justify-content: safe center;
 				overflow-x: auto;
-				padding: 8px;
-				background: var(--line);
+				padding: 0;
+				background: var(--bg);
+				border: 2px solid var(--line);
 			}
 			.fretboard .string-label {
 				display: flex;
@@ -36,8 +37,24 @@ export class ScaleView extends LitElement {
 				justify-content: center;
 				font-size: 11px;
 				color: var(--text-muted);
+				border-right: 2px solid var(--line);
 			}
+			/* Left-handed: the last fret column's own border-right is this axis line already */
+			.fretboard .string-label.lh {
+				border-right: 0;
+			}
+			/* The corner carries only the vertical axis so it stays continuous; no bottom border,
+			   so the corner is never a closed square */
 			.fretboard .corner {
+				border-right: 2px solid var(--line);
+			}
+			.fretboard .corner.lh {
+				border-right: 0;
+			}
+			/* Left-handed: the axis continues through the last fret-number cell, collinear with
+			   the last fret column's separator below */
+			.fretboard .fret-num.lh-axis {
+				border-right: 2px solid var(--line);
 			}
 			.fretboard .fret-num {
 				display: flex;
@@ -45,18 +62,24 @@ export class ScaleView extends LitElement {
 				justify-content: center;
 				font-size: 10px;
 				color: var(--text-muted);
+				border-bottom: 2px solid var(--line);
 			}
 			.fretboard .cell {
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				font-size: 10px;
-				min-height: 28px;
+				aspect-ratio: 21 / 9;
 				position: relative;
-				background: var(--panel);
+				background: transparent;
+				border-right: 2px solid var(--line);
+				border-bottom: 2px solid var(--line);
 			}
-			.fretboard .cell.in-scale {
-				background: var(--surface);
+			.fretboard .cell.last-row {
+				border-bottom: 0;
+			}
+			.fretboard .cell.last-col {
+				border-right: 0;
 			}
 			.fretboard .cell.open .dot {
 				width: 8px;
@@ -68,8 +91,9 @@ export class ScaleView extends LitElement {
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				width: 18px;
-				height: 18px;
+				width: auto;
+				height: min(18px, 100%);
+				aspect-ratio: 1;
 				border-radius: 50%;
 				font-size: 8px;
 				font-weight: 600;
@@ -184,24 +208,24 @@ export class ScaleView extends LitElement {
 				</label>
 			</div>
 		${this.fretboard.length > 0
-		? html`<div class="fretboard" style="grid-template-columns: ${this.leftHanded ? `repeat(${this.fretboard[0]?.length ?? 0}, 1fr) 32px` : `32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr)`};">
+		? html`<div class="fretboard" style="grid-template-columns: ${this.leftHanded ? `repeat(${this.fretboard[0]?.length ?? 0}, minmax(40px, 1fr)) 32px` : `32px repeat(${this.fretboard[0]?.length ?? 0}, minmax(40px, 1fr))`};">
 					${this.leftHanded
-						? html`${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
+							? html`${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
 									const cols = this.fretboard[0]?.length ?? 0;
 									const fretNum = this.startFret === 0 ? cols - i : this.startFret + cols - 1 - i;
-									return html`<div class="fret-num">${fretNum}</div>`;
-								})}<div class="corner"></div>${this.fretboard.map(
+									return html`<div class="fret-num${i === cols - 1 ? " lh-axis" : ""}">${fretNum}</div>`;
+									})}<div class="corner lh"></div>${this.fretboard.map(
 									(row, s) => html`${row.slice().reverse().map(
-										(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
-									)}<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>`,
+										(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}${s === this.fretboard.length - 1 ? " last-row" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+									)}<div class="string-label lh">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>`,
 								)}`
 							: html`<div class="corner"></div>
 							${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
 									const fretNum = this.startFret === 0 ? i + 1 : this.startFret + i;
 									return html`<div class="fret-num">${fretNum}</div>`;
-								})}${this.fretboard.map(
+									})}${this.fretboard.map(
 									(row, s) => html`<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>${row.map(
-										(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+										(cell, i) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}${s === this.fretboard.length - 1 ? " last-row" : ""}${i === row.length - 1 ? " last-col" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
 									)}`,
 								)}`}
 					</div>`
