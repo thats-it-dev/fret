@@ -51,7 +51,7 @@ export class ScaleView extends LitElement {
 				align-items: center;
 				justify-content: center;
 				font-size: 10px;
-				aspect-ratio: 1;
+				aspect-ratio: 4 / 3;
 				position: relative;
 				background: transparent;
 				border-right: 1px solid var(--line);
