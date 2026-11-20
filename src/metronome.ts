@@ -59,3 +59,24 @@ export function scheduleBeats(
 	}
 	return { events, state: { nextBeatTimeSec, nextBeatIndex } };
 }
+
+/** Common practice tempos; the metronome rail snaps between these values. */
+export const COMMON_BPM = [40, 60, 72, 80, 90, 100, 120, 140, 160, 180];
+
+/** The common tempo closest to bpm; ties pick the slower tempo. */
+export function nearestCommonBpm(bpm: number): number {
+	return COMMON_BPM.reduce(
+		(best, c) => (Math.abs(c - bpm) < Math.abs(best - bpm) ? c : best),
+		COMMON_BPM[0],
+	);
+}
+
+/** Index whose center is nearest to target; -1 for an empty list. */
+export function nearestIndex(centers: number[], target: number): number {
+	if (centers.length === 0) return -1;
+	let best = 0;
+	for (let i = 1; i < centers.length; i++) {
+		if (Math.abs(centers[i] - target) < Math.abs(centers[best] - target)) best = i;
+	}
+	return best;
+}

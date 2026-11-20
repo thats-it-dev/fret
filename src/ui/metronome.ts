@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "https://kit.thatsit.app/lit.js";
 import { sharedStyles } from "https://kit.thatsit.app/kit.js";
-import { scheduleBeats, type ScheduleState } from "../metronome.js";
+import { scheduleBeats, nearestIndex, nearestCommonBpm, COMMON_BPM, type ScheduleState } from "../metronome.js";
 
 export class MetronomeUI extends LitElement {
 	static properties = {
@@ -12,11 +12,39 @@ export class MetronomeUI extends LitElement {
 		sharedStyles,
 		css`
 			.container {
+				display: grid;
+				justify-items: center;
+				gap: 14px;
+			}
+			.bpm-readout {
+				font-size: 1.8rem;
+				font-variant-numeric: tabular-nums;
+			}
+			/* Swipeable rail: one common tempo snaps to the centre */
+			.tempo-rail {
+				display: flex;
+				gap: 6px;
+				width: min(100%, 320px);
+				overflow-x: auto;
+				scroll-snap-type: x mandatory;
+				/* half-rail side padding lets the first and last tempo reach the centre */
+				padding: 6px calc(50% - 26px);
+			}
+			.tempo-chip {
+				scroll-snap-align: center;
+				flex: 0 0 auto;
+				min-width: 44px;
+				min-height: 44px;
+				font-variant-numeric: tabular-nums;
+			}
+			.tempo-chip[aria-pressed="true"] {
+				color: var(--primary);
+				border-color: var(--primary);
+			}
+			.switch-row {
 				display: flex;
 				align-items: center;
-				justify-content: center;
-				gap: 12px;
-				flex-wrap: wrap;
+				gap: 10px;
 			}
 		`,
 	];
@@ -26,6 +54,7 @@ export class MetronomeUI extends LitElement {
 	private context: AudioContext | null = null;
 	private state: ScheduleState = { nextBeatTimeSec: 0, nextBeatIndex: 0 };
 	private rafId: number | null = null;
+	private railSettle: ReturnType<typeof setTimeout> | null = null;
 
 	private playClick(accent: boolean, whenSec: number): void {
 		if (!this.context) return;
@@ -69,11 +98,46 @@ export class MetronomeUI extends LitElement {
 		}
 	}
 
-	private _onBpmChange(e: Event): void {
-		const value = parseInt((e.target as HTMLInputElement).value, 10);
-		if (Number.isFinite(value) && value > 0) {
-			this.bpm = value;
-		}
+	/* The tempo centered on the rail is the active one (no typing involved) */
+	private _onRailScroll(): void {
+		if (this.railSettle) clearTimeout(this.railSettle);
+		this.railSettle = setTimeout(() => this._settleRail(), 120);
+	}
+
+	private _settleRail(): void {
+		const rail = this.renderRoot.querySelector<HTMLElement>(".tempo-rail");
+		if (!rail) return;
+		const chips = Array.from(rail.querySelectorAll<HTMLElement>(".tempo-chip"));
+		const railBox = rail.getBoundingClientRect();
+		const centers = chips.map((c) => {
+			const b = c.getBoundingClientRect();
+			return b.left + b.width / 2 - railBox.left;
+		});
+		const idx = nearestIndex(centers, railBox.width / 2);
+		if (idx >= 0) this.bpm = COMMON_BPM[idx];
+	}
+
+	private _pickChip(index: number, chip: HTMLElement): void {
+		this.bpm = COMMON_BPM[index];
+		chip.scrollIntoView({ inline: "center", block: "nearest" });
+	}
+
+	updated(changed: Map<string, unknown>): void {
+		if (changed.has("bpm")) this._centerChip();
+	}
+
+	/* Keep the active tempo centered when it changes from outside (e.g. a level preset) */
+	private _centerChip(): void {
+		const rail = this.renderRoot.querySelector<HTMLElement>(".tempo-rail");
+		if (!rail) return;
+		const chips = Array.from(rail.querySelectorAll<HTMLElement>(".tempo-chip"));
+		const idx = COMMON_BPM.indexOf(nearestCommonBpm(this.bpm));
+		const chip = chips[idx];
+		if (!chip) return;
+		const railBox = rail.getBoundingClientRect();
+		const chipBox = chip.getBoundingClientRect();
+		const offCenter = Math.abs(chipBox.left + chipBox.width / 2 - (railBox.left + railBox.width / 2));
+		if (offCenter > chipBox.width / 2) chip.scrollIntoView({ inline: "center", block: "nearest" });
 	}
 
 	_toggle(): void {
@@ -87,11 +151,26 @@ export class MetronomeUI extends LitElement {
 	render() {
 		return html`
 			<div class="container">
-				<label class="label">
-					tempo
-					<input type="number" min="30" max="240" step="1" .value=${String(this.bpm)} aria-label="Tempo in BPM" @change=${this._onBpmChange} />
-				</label>
-				<button class="btn" @click=${this._toggle}>${this.playing ? "Stop" : "Play"}</button>
+				<span class="bpm-readout" aria-live="polite">${this.bpm} <span class="label">bpm</span></span>
+				<div class="tempo-rail" role="group" aria-label="Common tempos" @scroll=${this._onRailScroll}>
+					${COMMON_BPM.map(
+						(b, i) => html`<button
+							class="btn ghost tempo-chip"
+							aria-pressed=${b === this.bpm ? "true" : "false"}
+							@click=${(e: Event) => this._pickChip(i, e.currentTarget as HTMLElement)}
+						>${b}</button>`,
+					)}
+				</div>
+				<div class="switch-row">
+					<span class="label" id="metro-switch-label">metronome</span>
+					<button
+						class="switch"
+						role="switch"
+						aria-checked=${String(this.playing)}
+						aria-labelledby="metro-switch-label"
+						@click=${this._toggle}
+					></button>
+				</div>
 			</div>
 		`;
 	}

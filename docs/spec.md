@@ -20,13 +20,15 @@ and ramps difficulty over time.
   `startFret=0` the open-string column is not shown on the board.
 - Scales: provides pentatonic (major & minor), major, natural minor, and blues. Each is
   available per root note and per starting fret.
-- Metronome: a centered card with a direct tempo number input (BPM) and Play/Stop; the accent
+- Metronome: a centered card enabled by a kit switch (not a play button), with the tempo chosen
+  without typing: a horizontally swipeable rail of common tempos (40–180) snaps one value to the
+  centre and that value is live; tapping a tempo also centers and selects it. The active click
   falls on the first beat of each bar (4/4). Clicks are scheduled on the audio clock (seconds), so
   the beat keeps its tempo even when animation frames lag. Timing feedback: after a practice
   session, show how many beats were played vs target.
-- Difficulty: a level (1..N). Higher levels preset a faster metronome tempo and widen the scale
-  position (more frets spanned); the tempo stays directly editable on the metronome card. The user
-  can level up when they can hold the current tempo for the whole session.
+- Difficulty: a level (1..N). Higher levels preset the nearest common metronome tempo and widen
+  the scale position (more frets spanned); the tempo stays directly swipeable on the metronome
+  card. The user can level up when they can hold the current tempo for the whole session.
 - Settings sheet: a `<tk-sheet heading="Settings">` opened from a Settings button in the header bar.
   Two-column panel (label left, control right). Persistent settings: level (select),
   left-handed toggle (checkbox), and daily goal in minutes (number input). Changes persist
@@ -34,7 +36,8 @@ and ramps difficulty over time.
 - All state (goal, level, last session) is stored in the browser (localStorage); no backend.
 
 ## Design
-- Flat design: no border boxes on sections; sections are separated by the page grid gap only.
+- Flat design: no border boxes on sections and no section headers; sections are separated by the
+  page grid gap only.
 - Fretboard: the board background is the page background (`--bg`) and cells never change
   background (in-scale notes read by their dot alone). Grid lines are 2px `--line`: a border frames
   the whole board; vertical fret separators sit on each cell's right edge except the last column

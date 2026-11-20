@@ -258,19 +258,42 @@ test("practice card stacks clock, progress bar and start button", async ({ page 
 	expect(Math.abs(t!.x + t!.width / 2 - (card!.x + card!.width / 2))).toBeLessThanOrEqual(4);
 });
 
-test("metronome tempo is tunable directly on the centered card", async ({ page }) => {
+test("metronome is enabled with a switch", async ({ page }) => {
 	await page.goto("/");
-	const tempo = page.locator('metronome-ui input[aria-label="Tempo in BPM"]');
-	await expect(tempo).toBeVisible();
-	const value0 = await tempo.inputValue();
-	expect(parseInt(value0, 10)).toBeGreaterThan(0);
-	await tempo.fill("96");
-	await tempo.dispatchEvent("change");
-	await expect(tempo).toHaveValue("96");
-	// The card's controls sit on a row centered within the component
-	const row = await page.locator("metronome-ui .container").boundingBox();
-	const met = await page.locator("metronome-ui").boundingBox();
-	expect(row).not.toBeNull();
-	expect(met).not.toBeNull();
-	expect(Math.abs(row!.x + row!.width / 2 - (met!.x + met!.width / 2))).toBeLessThanOrEqual(4);
+	const sw = page.getByRole("switch", { name: "metronome" });
+	await expect(sw).toHaveAttribute("aria-checked", "false");
+	await sw.click();
+	await expect(sw).toHaveAttribute("aria-checked", "true");
+	await sw.click();
+	await expect(sw).toHaveAttribute("aria-checked", "false");
+});
+
+test("tapping a common tempo selects it without typing", async ({ page }) => {
+	await page.goto("/");
+	const readout = page.locator("metronome-ui .bpm-readout");
+	await expect(readout).toContainText("60");
+	const chip120 = page.locator("metronome-ui .tempo-chip", { hasText: "120" });
+	await chip120.click();
+	await expect(readout).toContainText("120");
+	await expect(chip120).toHaveAttribute("aria-pressed", "true");
+});
+
+test("swiping the tempo rail picks the centered common tempo", async ({ page }) => {
+	await page.goto("/");
+	const rail = page.locator("metronome-ui .tempo-rail");
+	await expect(rail).toBeVisible();
+	// Swipe to the far end of the rail
+	await rail.evaluate((el) => {
+		el.scrollLeft = el.scrollWidth;
+	});
+	await expect(page.locator("metronome-ui .bpm-readout")).toContainText("180");
+	await expect(page.locator("metronome-ui .tempo-chip", { hasText: "180" })).toHaveAttribute(
+		"aria-pressed",
+		"true",
+	);
+});
+
+test("sections carry no headers", async ({ page }) => {
+	await page.goto("/");
+	await expect(page.locator("app-main h2")).toHaveCount(0);
 });

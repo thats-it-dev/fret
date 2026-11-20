@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { beatIntervalMs, isBeatAccent, scheduleBeats } from "../src/metronome.js";
+import { beatIntervalMs, isBeatAccent, scheduleBeats, nearestCommonBpm, nearestIndex } from "../src/metronome.js";
 
 describe("beatIntervalMs", () => {
 	it("returns 600 for 100bpm", () => {
@@ -77,5 +77,38 @@ describe("scheduleBeats", () => {
 				expect(times[i] - times[i - 1]).toBeCloseTo(60 / bpm, 6);
 			}
 		}
+	});
+});
+
+describe("nearestCommonBpm", () => {
+	it("keeps an exact common tempo", () => {
+		expect(nearestCommonBpm(100)).toBe(100);
+	});
+	it("picks the slower tempo on a tie", () => {
+		expect(nearestCommonBpm(110)).toBe(100);
+	});
+	it("rounds to the nearer neighbor", () => {
+		expect(nearestCommonBpm(113)).toBe(120);
+	});
+	it("clamps below the set", () => {
+		expect(nearestCommonBpm(10)).toBe(40);
+	});
+	it("clamps above the set", () => {
+		expect(nearestCommonBpm(500)).toBe(180);
+	});
+});
+
+describe("nearestIndex", () => {
+	it("finds the middle item", () => {
+		expect(nearestIndex([10, 50, 90], 52)).toBe(1);
+	});
+	it("clamps to the first item", () => {
+		expect(nearestIndex([10, 50, 90], 0)).toBe(0);
+	});
+	it("clamps to the last item", () => {
+		expect(nearestIndex([10, 50, 90], 200)).toBe(2);
+	});
+	it("returns -1 for an empty list", () => {
+		expect(nearestIndex([], 5)).toBe(-1);
 	});
 });
