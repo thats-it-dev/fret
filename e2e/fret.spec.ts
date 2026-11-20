@@ -146,6 +146,18 @@ test("fretboard cells keep a 21:9 aspect ratio and the board sits on the page ba
 		page.locator("scale-view").locator(".cell:not(.in-scale)").first().evaluate((el) => getComputedStyle(el).backgroundColor),
 	]);
 	expect(inBg).toBe(outBg);
+	// Fret separators stay on every cell; the string line exists except on the board's bottom row
+	const lastRowBorders = await page.locator("scale-view").locator(".cell.last-row").first().evaluate((el) => {
+		const cs = getComputedStyle(el);
+		return { bottom: cs.borderBottomWidth, right: cs.borderRightWidth };
+	});
+	expect(lastRowBorders).toEqual({ bottom: "0px", right: "2px" });
+	const normalBottom = await page
+		.locator("scale-view")
+		.locator(".cell:not(.last-row)")
+		.first()
+		.evaluate((el) => getComputedStyle(el).borderBottomWidth);
+	expect(normalBottom).toBe("2px");
 });
 
 test("the fretboard fills its container and scrolls when minimums overflow", async ({ page }) => {
