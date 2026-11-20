@@ -25,10 +25,10 @@ export class ScaleView extends LitElement {
 		css`
 			.fretboard {
 				display: grid;
-				gap: 1px;
+				justify-content: safe center;
 				overflow-x: auto;
-				padding: 8px;
-				background: var(--line);
+				padding: 8px 0;
+				background: var(--bg);
 			}
 			.fretboard .string-label {
 				display: flex;
@@ -51,9 +51,11 @@ export class ScaleView extends LitElement {
 				align-items: center;
 				justify-content: center;
 				font-size: 10px;
-				min-height: 28px;
+				aspect-ratio: 1;
 				position: relative;
-				background: var(--panel);
+				background: transparent;
+				border-right: 1px solid var(--line);
+				border-bottom: 1px solid var(--line);
 			}
 			.fretboard .cell.in-scale {
 				background: var(--surface);
@@ -184,7 +186,7 @@ export class ScaleView extends LitElement {
 				</label>
 			</div>
 		${this.fretboard.length > 0
-		? html`<div class="fretboard" style="grid-template-columns: ${this.leftHanded ? `repeat(${this.fretboard[0]?.length ?? 0}, 1fr) 32px` : `32px repeat(${this.fretboard[0]?.length ?? 0}, 1fr)`};">
+		? html`<div class="fretboard" style="grid-template-columns: ${this.leftHanded ? `repeat(${this.fretboard[0]?.length ?? 0}, minmax(40px, 72px)) 32px` : `32px repeat(${this.fretboard[0]?.length ?? 0}, minmax(40px, 72px))`};">
 					${this.leftHanded
 						? html`${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {
 									const cols = this.fretboard[0]?.length ?? 0;

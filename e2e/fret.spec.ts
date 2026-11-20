@@ -114,3 +114,20 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 	const cellTitle = await page.locator("scale-view").locator(".cell").first().getAttribute("title");
 	expect(cellTitle).toContain("fret 5");
 });
+
+test("fretboard cells keep a 1:1 aspect ratio and the board sits on the page background", async ({ page }) => {
+	await page.goto("/");
+	const board = page.locator("scale-view").locator(".fretboard");
+	await expect(board).toBeVisible();
+	const cell = page.locator("scale-view").locator(".cell").first();
+	await expect(async () => {
+		const box = await cell.boundingBox();
+		expect(box).not.toBeNull();
+		expect(Math.abs(box!.width - box!.height)).toBeLessThanOrEqual(1);
+	}).toPass();
+	const [boardBg, pageBg] = await Promise.all([
+		board.evaluate((el) => getComputedStyle(el).backgroundColor),
+		page.evaluate(() => getComputedStyle(document.body).backgroundColor),
+	]);
+	expect(boardBg).toBe(pageBg);
+});
