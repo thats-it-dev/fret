@@ -132,7 +132,7 @@ test("fretboard cells keep a 16:9 aspect ratio and the board sits on the page ba
 		expect(Math.abs(box!.width - box!.height * (16 / 9))).toBeLessThanOrEqual(1);
 	};
 	await expect(assertRatio).toPass();
-	// Same assertion at a narrow (overflow) width, per the spec's "every screen width" claim
+	// Same ratio at a narrow viewport
 	await page.setViewportSize({ width: 320, height: 800 });
 	await expect(assertRatio).toPass();
 	const [boardBg, pageBg] = await Promise.all([
@@ -142,20 +142,25 @@ test("fretboard cells keep a 16:9 aspect ratio and the board sits on the page ba
 	expect(boardBg).toBe(pageBg);
 });
 
-test("cells grow past the old 72px cap and the board scrolls when minimums overflow", async ({ page }) => {
+test("the fretboard fills its container and scrolls when minimums overflow", async ({ page }) => {
 	await page.goto("/");
+	const board = page.locator("scale-view").locator(".fretboard");
+	await expect(board).toBeVisible();
 	const cell = page.locator("scale-view").locator(".cell").first();
 	await expect(cell).toBeVisible();
-	const box = await cell.boundingBox();
-	expect(box).not.toBeNull();
-	// The board fills the page container: cells exceed the old 72px track cap
-	expect(box!.width).toBeGreaterThan(72);
+	// Tracks are 1fr: every fret column takes its share of the board width (no fixed cap)
+	const fills = await board.evaluate((fb) => {
+		const cells = fb.querySelectorAll(".cell");
+		const cols = cells.length / 6;
+		const track = (fb.clientWidth - 32) / cols;
+		return Math.abs((cells[0] as HTMLElement).getBoundingClientRect().width - track) <= 2;
+	});
+	expect(fills).toBe(true);
 	// Level 6 (8 frets) at 320px: 8x40px minimums exceed the content box, so the board scrolls
 	await page.setViewportSize({ width: 320, height: 800 });
 	await page.locator('button[aria-label="Settings"]').click();
 	await page.locator("tk-sheet").locator("select").selectOption("6");
 	await page.locator("tk-sheet").locator('button[aria-label="Close"]').click();
-	const board = page.locator("scale-view").locator(".fretboard");
 	await expect(board.locator(".cell")).toHaveCount(48);
 	const scrollable = await board.evaluate((el) => el.scrollWidth > el.clientWidth);
 	expect(scrollable).toBe(true);
