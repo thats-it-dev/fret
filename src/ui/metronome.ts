@@ -83,6 +83,16 @@ export class MetronomeUI extends LitElement {
 
 	private tick = (): void => {
 		if (!this.context) return;
+		if (this.context.state === "suspended") {
+			void this.context.resume();
+			this.state = { nextBeatTimeSec: this.context.currentTime + 0.1, nextBeatIndex: 0 };
+			this.rafId = requestAnimationFrame(this.tick);
+			return;
+		}
+		if (this.context.state !== "running") {
+			this.rafId = requestAnimationFrame(this.tick);
+			return;
+		}
 		const scheduled = scheduleBeats(this.state, this.context.currentTime, this.bpm);
 		for (const event of scheduled.events) {
 			this.playClick(event.accent, event.timeSec);
@@ -94,6 +104,16 @@ export class MetronomeUI extends LitElement {
 	private play(): void {
 		this.playing = true;
 		this.context = new AudioContext();
+		/* iOS: a context created in a gesture can still start suspended and its clock is
+		   frozen until resume() lands; tick retries while that settles */
+		if (this.context.state === "suspended") {
+			void this.context.resume();
+		}
+		/* iOS unlock: one empty buffer started inside the gesture opens the audio session */
+		const unlock = this.context.createBufferSource();
+		unlock.buffer = this.context.createBuffer(1, 1, this.context.sampleRate);
+		unlock.connect(this.context.destination);
+		unlock.start(0);
 		this.state = { nextBeatTimeSec: this.context.currentTime + 0.1, nextBeatIndex: 0 };
 		this.rafId = requestAnimationFrame(this.tick);
 	}
