@@ -35,7 +35,8 @@ and ramps difficulty over time.
 - Fretboard: the board background is the page background (`--bg`) and cells never change
   background (in-scale notes read by their dot alone). Grid lines are 2px `--line`: a vertical
   separator on every cell's right edge and a horizontal string line on every row's bottom edge
-  except the board's bottom row (`last-row`). Cells keep a fixed 21:9 aspect ratio (wider than
+  except the board's bottom row (`last-row`). Note dots are capped to the cell height so they stay
+  circular when the board scrolls at minimum track width. Cells keep a fixed 21:9 aspect ratio (wider than
   tall) at every screen width; tracks are `minmax(40px, 1fr)` so the board fills the page width
   and scrolls horizontally only when the 40px minimums no longer fit.
 - Settings uses a `<tk-sheet>` with the kit `.form` two-column grid (label left, control right).
