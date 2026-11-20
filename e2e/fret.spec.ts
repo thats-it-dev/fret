@@ -120,11 +120,16 @@ test("fretboard cells keep a 1:1 aspect ratio and the board sits on the page bac
 	const board = page.locator("scale-view").locator(".fretboard");
 	await expect(board).toBeVisible();
 	const cell = page.locator("scale-view").locator(".cell").first();
-	await expect(async () => {
+	const assertSquare = async () => {
 		const box = await cell.boundingBox();
 		expect(box).not.toBeNull();
 		expect(Math.abs(box!.width - box!.height)).toBeLessThanOrEqual(1);
-	}).toPass();
+	};
+	await expect(assertSquare).toPass();
+	// Same assertion at a narrow (overflow) width, per the spec's "every screen width" claim
+	await page.setViewportSize({ width: 320, height: 800 });
+	await expect(assertSquare).toPass();
+	await page.setViewportSize({ width: 1280, height: 800 });
 	const [boardBg, pageBg] = await Promise.all([
 		board.evaluate((el) => getComputedStyle(el).backgroundColor),
 		page.evaluate(() => getComputedStyle(document.body).backgroundColor),
