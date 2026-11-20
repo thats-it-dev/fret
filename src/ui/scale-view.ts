@@ -27,8 +27,9 @@ export class ScaleView extends LitElement {
 				display: grid;
 				justify-content: safe center;
 				overflow-x: auto;
-				padding: 8px 0;
+				padding: 0;
 				background: var(--bg);
+				border: 2px solid var(--line);
 			}
 			.fretboard .string-label {
 				display: flex;
@@ -59,6 +60,9 @@ export class ScaleView extends LitElement {
 			}
 			.fretboard .cell.last-row {
 				border-bottom: 0;
+			}
+			.fretboard .cell.last-col {
+				border-right: 0;
 			}
 			.fretboard .cell.open .dot {
 				width: 8px;
@@ -195,7 +199,7 @@ export class ScaleView extends LitElement {
 									return html`<div class="fret-num">${fretNum}</div>`;
 									})}<div class="corner"></div>${this.fretboard.map(
 									(row, s) => html`${row.slice().reverse().map(
-										(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}${s === this.fretboard.length - 1 ? " last-row" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+										(cell, i) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}${s === this.fretboard.length - 1 ? " last-row" : ""}${i === 0 ? " last-col" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
 									)}<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>`,
 								)}`
 							: html`<div class="corner"></div>
@@ -204,7 +208,7 @@ export class ScaleView extends LitElement {
 									return html`<div class="fret-num">${fretNum}</div>`;
 									})}${this.fretboard.map(
 									(row, s) => html`<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>${row.map(
-										(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}${s === this.fretboard.length - 1 ? " last-row" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
+										(cell, i) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}${s === this.fretboard.length - 1 ? " last-row" : ""}${i === row.length - 1 ? " last-col" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
 									)}`,
 								)}`}
 					</div>`

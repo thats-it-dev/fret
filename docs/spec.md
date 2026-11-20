@@ -33,8 +33,9 @@ and ramps difficulty over time.
 ## Design
 - Flat design: no border boxes on sections; sections are separated by the page grid gap only.
 - Fretboard: the board background is the page background (`--bg`) and cells never change
-  background (in-scale notes read by their dot alone). Grid lines are 2px `--line`: a vertical
-  separator on every cell's right edge and a horizontal string line on every row's bottom edge
+  background (in-scale notes read by their dot alone). Grid lines are 2px `--line`: a border frames
+  the whole board; vertical fret separators sit on each cell's right edge except the last column
+  (`last-col`, where the frame is the edge), and horizontal string lines on each row's bottom edge
   except the board's bottom row (`last-row`). Note dots are capped to the cell height so they stay
   circular when the board scrolls at minimum track width. Cells keep a fixed 21:9 aspect ratio (wider than
   tall) at every screen width; tracks are `minmax(40px, 1fr)` so the board fills the page width

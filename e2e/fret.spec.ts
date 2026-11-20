@@ -158,6 +158,18 @@ test("fretboard cells keep a 21:9 aspect ratio and the board sits on the page ba
 		.first()
 		.evaluate((el) => getComputedStyle(el).borderBottomWidth);
 	expect(normalBottom).toBe("2px");
+	// The frame surrounds the whole board; the last fret column defers to it (no doubled line)
+	const frame = await board.evaluate((el) => {
+		const cs = getComputedStyle(el);
+		return [cs.borderTopWidth, cs.borderRightWidth, cs.borderBottomWidth, cs.borderLeftWidth].join(",");
+	});
+	expect(frame).toBe("2px,2px,2px,2px");
+	const lastColRight = await page
+		.locator("scale-view")
+		.locator(".cell.last-col")
+		.first()
+		.evaluate((el) => getComputedStyle(el).borderRightWidth);
+	expect(lastColRight).toBe("0px");
 });
 
 test("the fretboard fills its container and scrolls when minimums overflow", async ({ page }) => {
