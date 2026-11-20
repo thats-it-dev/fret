@@ -1,6 +1,5 @@
 import { LitElement, html, css } from "https://kit.thatsit.app/lit.js";
 import { sharedStyles } from "https://kit.thatsit.app/kit.js";
-import { getTodayMs, formatDuration } from "../goals.js";
 
 export class PracticeUI extends LitElement {
 	static properties = {
