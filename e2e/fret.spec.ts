@@ -113,15 +113,15 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 	// Cell order should also be reversed
 	const cellTitle = await page.locator("scale-view").locator(".cell").first().getAttribute("title");
 	expect(cellTitle).toContain("fret 5");
-	// Cells keep the 16:9 ratio in left-handed mode too
+	// Cells keep the 21:9 ratio in left-handed mode too
 	await expect(async () => {
 		const box = await page.locator("scale-view").locator(".cell").first().boundingBox();
 		expect(box).not.toBeNull();
-		expect(Math.abs(box!.width - box!.height * (16 / 9))).toBeLessThanOrEqual(1);
+		expect(Math.abs(box!.width - box!.height * (21 / 9))).toBeLessThanOrEqual(1);
 	}).toPass();
 });
 
-test("fretboard cells keep a 16:9 aspect ratio and the board sits on the page background", async ({ page }) => {
+test("fretboard cells keep a 21:9 aspect ratio and the board sits on the page background", async ({ page }) => {
 	await page.goto("/");
 	const board = page.locator("scale-view").locator(".fretboard");
 	await expect(board).toBeVisible();
@@ -129,7 +129,7 @@ test("fretboard cells keep a 16:9 aspect ratio and the board sits on the page ba
 	const assertRatio = async () => {
 		const box = await cell.boundingBox();
 		expect(box).not.toBeNull();
-		expect(Math.abs(box!.width - box!.height * (16 / 9))).toBeLessThanOrEqual(1);
+		expect(Math.abs(box!.width - box!.height * (21 / 9))).toBeLessThanOrEqual(1);
 	};
 	await expect(assertRatio).toPass();
 	// Same ratio at a narrow viewport
