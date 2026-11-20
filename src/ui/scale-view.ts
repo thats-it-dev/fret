@@ -70,8 +70,8 @@ export class ScaleView extends LitElement {
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				width: 18px;
-				height: 18px;
+				width: min(18px, 100%);
+				height: min(18px, 100%);
 				border-radius: 50%;
 				font-size: 8px;
 				font-weight: 600;
