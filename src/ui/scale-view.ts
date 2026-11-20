@@ -37,8 +37,14 @@ export class ScaleView extends LitElement {
 				justify-content: center;
 				font-size: 11px;
 				color: var(--text-muted);
+				border-right: 2px solid var(--line);
+			}
+			/* Left-handed: the last fret column's own border-right is this axis line already */
+			.fretboard .string-label.lh {
+				border-right: 0;
 			}
 			.fretboard .corner {
+				border-bottom: 2px solid var(--line);
 			}
 			.fretboard .fret-num {
 				display: flex;
@@ -46,6 +52,7 @@ export class ScaleView extends LitElement {
 				justify-content: center;
 				font-size: 10px;
 				color: var(--text-muted);
+				border-bottom: 2px solid var(--line);
 			}
 			.fretboard .cell {
 				display: flex;
@@ -200,7 +207,7 @@ export class ScaleView extends LitElement {
 									})}<div class="corner"></div>${this.fretboard.map(
 									(row, s) => html`${row.slice().reverse().map(
 										(cell) => html`<div class="cell ${cell.inScale ? "in-scale" : ""}${s === this.fretboard.length - 1 ? " last-row" : ""}" title="fret ${cell.fret}: ${cell.note}">${this._renderCell(cell)}</div>`,
-									)}<div class="string-label">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>`,
+									)}<div class="string-label lh">${["1st", "2nd", "3rd", "4th", "5th", "6th"][s]}</div>`,
 								)}`
 							: html`<div class="corner"></div>
 							${Array.from({ length: this.fretboard[0]?.length ?? 0 }, (_, i) => {

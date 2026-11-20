@@ -170,6 +170,19 @@ test("fretboard cells keep a 21:9 aspect ratio and the board sits on the page ba
 		.first()
 		.evaluate((el) => getComputedStyle(el).borderRightWidth);
 	expect(lastColRight).toBe("0px");
+	// Label axes: a line under the number row and beside the string labels (right-handed default)
+	const numBottom = await page
+		.locator("scale-view")
+		.locator(".fret-num")
+		.first()
+		.evaluate((el) => getComputedStyle(el).borderBottomWidth);
+	expect(numBottom).toBe("2px");
+	const labelRight = await page
+		.locator("scale-view")
+		.locator(".string-label")
+		.first()
+		.evaluate((el) => getComputedStyle(el).borderRightWidth);
+	expect(labelRight).toBe("2px");
 });
 
 test("the fretboard fills its container and scrolls when minimums overflow", async ({ page }) => {

@@ -36,8 +36,10 @@ and ramps difficulty over time.
   background (in-scale notes read by their dot alone). Grid lines are 2px `--line`: a border frames
   the whole board; vertical fret separators sit on each cell's right edge except the last column
   (`last-col`, where the frame is the edge; in left-handed mode the string labels sit at the right
-  edge instead, so no fret cell touches it), and horizontal string lines on each row's bottom edge
-  except the board's bottom row (`last-row`). Note dots are capped to the cell height so they stay
+  edge instead, so no fret cell touches it), horizontal string lines on each row's bottom edge
+  except the board's bottom row (`last-row`), and lines along the label axes: the number row carries
+  a bottom border and, right-handed, the string labels a right border (left-handed, the last fret
+  column's separator is that axis). Note dots are capped to the cell height so they stay
   circular when the board scrolls at minimum track width. Cells keep a fixed 21:9 aspect ratio (wider than
   tall) at every screen width; tracks are `minmax(40px, 1fr)` so the board fills the page width
   and scrolls horizontally only when the 40px minimums no longer fit.
