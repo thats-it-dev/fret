@@ -61,6 +61,7 @@ export class MetronomeUI extends LitElement {
 	private state: ScheduleState = { nextBeatTimeSec: 0, nextBeatIndex: 0 };
 	private rafId: number | null = null;
 	private railSettle: ReturnType<typeof setTimeout> | null = null;
+	private fromRail = false;
 
 	private playClick(accent: boolean, whenSec: number): void {
 		if (!this.context) return;
@@ -120,11 +121,17 @@ export class MetronomeUI extends LitElement {
 			return b.left + b.width / 2 - railBox.left;
 		});
 		const idx = nearestIndex(centers, railBox.width / 2);
-		if (idx >= 0) this.bpm = COMMON_BPM[idx];
+		if (idx >= 0 && this.bpm !== COMMON_BPM[idx]) {
+			this.fromRail = true;
+			this.bpm = COMMON_BPM[idx];
+		}
 	}
 
 	private _pickChip(index: number): void {
-		this.bpm = COMMON_BPM[index];
+		if (this.bpm !== COMMON_BPM[index]) {
+			this.fromRail = true;
+			this.bpm = COMMON_BPM[index];
+		}
 		this._centerOn(index, "smooth");
 	}
 
@@ -134,6 +141,11 @@ export class MetronomeUI extends LitElement {
 
 	updated(changed: Map<string, unknown>): void {
 		if (changed.has("bpm")) {
+			/* a rail-originated change is already centered by the tap itself */
+			if (this.fromRail) {
+				this.fromRail = false;
+				return;
+			}
 			this._centerOn(COMMON_BPM.indexOf(nearestCommonBpm(this.bpm)), "smooth");
 		}
 	}
