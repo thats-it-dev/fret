@@ -113,6 +113,12 @@ test("left-handed mode mirrors fretboard", async ({ page }) => {
 	// Cell order should also be reversed
 	const cellTitle = await page.locator("scale-view").locator(".cell").first().getAttribute("title");
 	expect(cellTitle).toContain("fret 5");
+	// Cells keep the 4:3 ratio in left-handed mode too
+	await expect(async () => {
+		const box = await page.locator("scale-view").locator(".cell").first().boundingBox();
+		expect(box).not.toBeNull();
+		expect(Math.abs(box!.width - box!.height * (4 / 3))).toBeLessThanOrEqual(1);
+	}).toPass();
 });
 
 test("fretboard cells keep a 4:3 aspect ratio and the board sits on the page background", async ({ page }) => {
@@ -129,7 +135,6 @@ test("fretboard cells keep a 4:3 aspect ratio and the board sits on the page bac
 	// Same assertion at a narrow (overflow) width, per the spec's "every screen width" claim
 	await page.setViewportSize({ width: 320, height: 800 });
 	await expect(assertRatio).toPass();
-	await page.setViewportSize({ width: 1280, height: 800 });
 	const [boardBg, pageBg] = await Promise.all([
 		board.evaluate((el) => getComputedStyle(el).backgroundColor),
 		page.evaluate(() => getComputedStyle(document.body).backgroundColor),
