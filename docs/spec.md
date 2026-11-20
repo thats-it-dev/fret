@@ -22,7 +22,8 @@ and ramps difficulty over time.
   available per root note and per starting fret.
 - Metronome: a centered card enabled by a kit switch (not a play button), with the tempo chosen
   without typing: a horizontally swipeable rail of common tempos (40–180) snaps one value to the
-  centre and that value is live; tapping a tempo also centers and selects it. The active click
+  centre and that value is live; the highlighted tempo follows the centre while swiping, and the
+  rail shows no scrollbar; tapping a tempo also centers and selects it. The active click
   falls on the first beat of each bar (4/4). Clicks are scheduled on the audio clock (seconds), so
   the beat keeps its tempo even when animation frames lag. Timing feedback: after a practice
   session, show how many beats were played vs target.

@@ -305,6 +305,36 @@ test("swiping the tempo rail picks the centered common tempo", async ({ page }) 
 	);
 });
 
+test("the highlighted tempo follows the rail centre mid-swipe", async ({ page }) => {
+	await page.goto("/");
+	const rail = page.locator("metronome-ui .tempo-rail");
+	// Stop the rail mid-travel, between two snap points
+	await rail.evaluate((el) => {
+		el.scrollLeft = 120;
+	});
+	await expect(async () => {
+		const boxes = await page.locator("metronome-ui .tempo-chip").evaluateAll((els) =>
+			els.map((e) => {
+				const b = e.getBoundingClientRect();
+				return { center: b.left + b.width / 2, text: e.textContent || "", pressed: e.getAttribute("aria-pressed") === "true" };
+			}),
+		);
+		const railBox = await rail.boundingBox();
+		const railCenter = railBox!.x + railBox!.width / 2;
+		const nearest = boxes!.reduce((best, c) => (Math.abs(c.center - railCenter) < Math.abs(best.center - railCenter) ? c : best));
+		expect(nearest.pressed).toBe(true);
+		await expect(page.locator("metronome-ui .bpm-readout")).toContainText(nearest.text!);
+	}).toPass();
+});
+
+test("the tempo rail shows no scrollbar", async ({ page }) => {
+	await page.goto("/");
+	const hidden = await page
+		.locator("metronome-ui .tempo-rail")
+		.evaluate((el) => getComputedStyle(el).scrollbarWidth === "none");
+	expect(hidden).toBe(true);
+});
+
 test("sections carry no headers", async ({ page }) => {
 	await page.goto("/");
 	await expect(page.locator("app-main h2")).toHaveCount(0);

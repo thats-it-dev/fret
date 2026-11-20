@@ -20,7 +20,8 @@ export class MetronomeUI extends LitElement {
 				font-size: 1.8rem;
 				font-variant-numeric: tabular-nums;
 			}
-			/* Swipeable rail: one common tempo snaps to the centre */
+			/* Swipeable rail: the highlighted tempo stays at the centre; touch-first, so no
+			   scrollbar is shown */
 			.tempo-rail {
 				display: flex;
 				gap: 6px;
@@ -28,6 +29,10 @@ export class MetronomeUI extends LitElement {
 				overflow-x: auto;
 				scroll-snap-type: x mandatory;
 				padding: 6px 0;
+				scrollbar-width: none;
+			}
+			.tempo-rail::-webkit-scrollbar {
+				display: none;
 			}
 			/* Spacers so the first and last tempo can reach the centre (fixed against the
 			   320px rail: half-rail 160 minus half-chip ~26; percentage widths are indeterminate
@@ -60,7 +65,7 @@ export class MetronomeUI extends LitElement {
 	private context: AudioContext | null = null;
 	private state: ScheduleState = { nextBeatTimeSec: 0, nextBeatIndex: 0 };
 	private rafId: number | null = null;
-	private railSettle: ReturnType<typeof setTimeout> | null = null;
+	private scrollSyncPending = false;
 	private fromRail = false;
 
 	private playClick(accent: boolean, whenSec: number): void {
@@ -105,26 +110,27 @@ export class MetronomeUI extends LitElement {
 		}
 	}
 
-	/* The tempo centered on the rail is the active one (no typing involved) */
+	/* The highlighted tempo follows the rail centre on every scroll frame, so it stays
+	   centered while the user swipes rather than only after the rail settles */
 	private _onRailScroll(): void {
-		if (this.railSettle) clearTimeout(this.railSettle);
-		this.railSettle = setTimeout(() => this._settleRail(), 120);
-	}
-
-	private _settleRail(): void {
-		const rail = this.renderRoot.querySelector<HTMLElement>(".tempo-rail");
-		if (!rail) return;
-		const chips = Array.from(rail.querySelectorAll<HTMLElement>(".tempo-chip"));
-		const railBox = rail.getBoundingClientRect();
-		const centers = chips.map((c) => {
-			const b = c.getBoundingClientRect();
-			return b.left + b.width / 2 - railBox.left;
+		if (this.scrollSyncPending) return;
+		this.scrollSyncPending = true;
+		requestAnimationFrame(() => {
+			this.scrollSyncPending = false;
+			const rail = this.renderRoot.querySelector<HTMLElement>(".tempo-rail");
+			if (!rail) return;
+			const chips = Array.from(rail.querySelectorAll<HTMLElement>(".tempo-chip"));
+			const railBox = rail.getBoundingClientRect();
+			const centers = chips.map((c) => {
+				const b = c.getBoundingClientRect();
+				return b.left + b.width / 2 - railBox.left;
+			});
+			const idx = nearestIndex(centers, railBox.width / 2);
+			if (idx >= 0 && this.bpm !== COMMON_BPM[idx]) {
+				this.fromRail = true;
+				this.bpm = COMMON_BPM[idx];
+			}
 		});
-		const idx = nearestIndex(centers, railBox.width / 2);
-		if (idx >= 0 && this.bpm !== COMMON_BPM[idx]) {
-			this.fromRail = true;
-			this.bpm = COMMON_BPM[idx];
-		}
 	}
 
 	private _pickChip(index: number): void {
@@ -173,7 +179,7 @@ export class MetronomeUI extends LitElement {
 	render() {
 		return html`
 			<div class="container">
-				<span class="bpm-readout" aria-live="polite">${this.bpm} <span class="label">bpm</span></span>
+				<span class="bpm-readout">${this.bpm} <span class="label">bpm</span></span>
 				<div class="tempo-rail" role="group" aria-label="Common tempos" @scroll=${this._onRailScroll}>
 					<span class="rail-pad" aria-hidden="true"></span>
 					${COMMON_BPM.map(
